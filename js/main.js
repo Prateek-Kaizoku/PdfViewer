@@ -1,4 +1,4 @@
-const url = "../docs/npdf.pdf";
+const url = "../docs/IR.pdf";
 
 let boundingBoxes = [];
 let pdfDoc = null,
