@@ -234,7 +234,7 @@ document.querySelector("#tess-button").addEventListener("click", function () {
         } = line;
 
         // Check if the paragraph is likely bold using a criterion, e.g., confidence
-        const isBold = word.confidence > 90; // You may need to adjust this threshold
+        const isBold = line.confidence > 90; // You may need to adjust this threshold
 
         // Draw the bounding box on the canvas
         ctx.beginPath();
