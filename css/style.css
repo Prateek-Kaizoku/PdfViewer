@@ -1,6 +1,14 @@
+:root {
+  --primary-color: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+  --hover-opacity: 0.9;
+  --button-radius: 25px;
+  --transition-speed: 0.3s;
+}
+
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 .top-bar {
@@ -8,18 +16,35 @@
   color: #fff;
   padding: 1rem;
 }
+.custom-file-upload {
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #67bd17;
+  border: 2px solid #000;
+  font-family: 'Arial', sans-serif;
+  color: #fff;
+  border-radius: 5px;
+}
+
+.custom-file-upload:hover {
+  background-color: #559a12;
+}
 
 .btn {
-  background: coral;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   outline: none;
   cursor: pointer;
   padding: 0.7rem 2rem;
+  border-radius: var(--button-radius);
+  display: inline-block;
+  transition: opacity var(--transition-speed); /* smooth transition */
 }
 
 .btn:hover {
-  opacity: 0.9;
+  opacity: var(--hover-opacity);
 }
 
 .page-info {
@@ -31,13 +56,15 @@
   color: #fff;
   padding: 1rem;
 }
+
 #pdf-container {
   position: relative;
 }
+
 .star {
   position: absolute;
   cursor: pointer;
-  font-size: 20px; /* Adjust as needed */
+  font-size: 20px;
 }
 
 .annotation {
@@ -45,23 +72,77 @@
   background: yellow;
   border: 1px solid black;
   padding: 5px;
-  display: none; /* Initially hidden */
+  display: none;
+}
+
+.annotation-dialog label {
+  display: block;
+  font-size: 14px; /* You can adjust this value */
+  margin-bottom: 10px; /* Adds some space below the label */
+  color: #fff; /* This makes the label text white to match the dialog's text color */
 }
 
 .annotation-dialog {
-  /* display: none; -- remove this line, since the dialog is added dynamically */
-  position: fixed;
+  position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 300px;
+  width: 400px;
+  height: 200px; /* Fixed height */
+  max-width: 90%; /* A bit of responsiveness */
   border: 2px solid #000;
   padding: 20px;
-  background-color: #fff;
+  background: linear-gradient(160deg, #1a1a1a, #0d0d0d);
+  border-radius: 15px;
+  font-family: 'Arial', sans-serif;
+  color: #fff;
+  overflow-y: hidden; /* No vertical scrollbar */
   z-index: 1000;
+  opacity: 0; /* Set initial opacity to 0 */
+  transition: opacity 0.5s ease-in-out;
+  cursor: move;
+}
+.annotation-dialog.visible {
+  opacity: 1; /* Set final opacity to 1 when the "visible" class is added */
 }
 
 #annotation-textarea {
   width: 100%;
-  height: 100px;
+  height: 80px; /* Reduced height to ensure no overflow */
+  margin-bottom: 10px; /* Space below the textarea */
+  padding: 10px; /* Inner padding for better appearance */
+  background-color: #333;
+}
+
+.annotation-dialog button {
+  padding: 10px 20px;
+  margin: 5px;
+  cursor: pointer;
+  border: 1px solid #000;
+  background-color: #0754a6e9;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px; /* Curved edges for the buttons */
+}
+
+.annotation-dialog button:last-child {
+  background-color: #bc0909;
+}
+
+.annotation-dialog button:hover {
+  background-color: #0056b3;
+}
+
+.annotation-dialog button:last-child:hover {
+  background-color: #999;
+}
+
+@media screen and (max-width: 600px) {
+  .btn {
+    padding: 0.5rem 1rem;
+  }
+
+  .annotation-dialog {
+    width: 90%;
+  }
 }

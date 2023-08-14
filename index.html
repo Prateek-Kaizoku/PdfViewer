@@ -30,8 +30,15 @@
       </button>
       <button class="btn" id="generate-comments">Generate Comments</button>
       <button class="btn" id="tess-button">Tess</button>
-      <input class="btn" type="file" id="fileUpload" accept="application/pdf" />
-      <button class="btn" id="uploadButton">Upload PDF</button>
+      <label for="fileUpload" class="btn custom-file-upload" id="uploadButton">
+        Upload PDF
+      </label>
+      <input
+        type="file"
+        id="fileUpload"
+        accept="application/pdf"
+        style="display: none"
+      />
     </div>
 
     <div id="pdf-container" onclick="addAnnotation(event)">

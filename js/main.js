@@ -127,7 +127,28 @@ function addAnnotation(event) {
   const commentTextarea = document.createElement("textarea");
   commentLabel.appendChild(commentTextarea);
   dialog.appendChild(commentLabel);
+  let isDragging = false;
 
+  dialog.addEventListener("mousedown", function (event) {
+    isDragging = true;
+    var offsetX = event.clientX - dialog.getBoundingClientRect().left;
+    var offsetY = event.clientY - dialog.getBoundingClientRect().top;
+
+    function onMouseMove(e) {
+      if (isDragging) {
+        dialog.style.left = e.clientX - offsetX + "px";
+        dialog.style.top = e.clientY - offsetY + "px";
+        dialog.style.transform = "none"; // Remove the centering transform
+      }
+    }
+
+    document.addEventListener("mousemove", onMouseMove);
+
+    dialog.addEventListener("mouseup", function () {
+      isDragging = false;
+      document.removeEventListener("mousemove", onMouseMove);
+    });
+  });
   const submitButton = document.createElement("button");
   submitButton.textContent = "Submit";
   const cancelButton = document.createElement("button");
@@ -136,6 +157,9 @@ function addAnnotation(event) {
   dialog.appendChild(submitButton);
   dialog.appendChild(cancelButton);
   document.body.appendChild(dialog);
+  requestAnimationFrame(function () {
+    dialog.classList.add("visible"); // Add "visible" class
+  });
 
   submitButton.addEventListener("click", function () {
     const region = getRegion(x, y);
@@ -184,14 +208,32 @@ function addAnnotation(event) {
     }
     // Remove dialog box
 
-    document.body.removeChild(dialog);
-    dialogOpen = false;
+    dialog.classList.remove("visible");
+
+    // Wait for the transition to complete before actually removing the dialog
+    dialog.addEventListener(
+      "transitionend",
+      function () {
+        document.body.removeChild(dialog);
+        dialogOpen = false;
+      },
+      { once: true }
+    );
   });
 
   cancelButton.addEventListener("click", function () {
     // Remove dialog box without saving
-    document.body.removeChild(dialog);
-    dialogOpen = false;
+    dialog.classList.remove("visible");
+
+    // Wait for the transition to complete before actually removing the dialog
+    dialog.addEventListener(
+      "transitionend",
+      function () {
+        document.body.removeChild(dialog);
+        dialogOpen = false;
+      },
+      { once: true }
+    );
   });
 }
 
@@ -395,7 +437,40 @@ canvas.addEventListener("click", function (event) {
   console.log(`Clicked region: ${region}`); // Will print the region name
 });
 
-document.getElementById("uploadButton").addEventListener("click", () => {
+// document.getElementById("uploadButton").addEventListener("change", () => {
+//   const fileInput = document.getElementById("fileUpload");
+//   const file = fileInput.files[0];
+
+//   if (file) {
+//     const reader = new FileReader();
+
+//     reader.onload = function (e) {
+//       const newUrl = e.target.result;
+
+//       // Update the PDF document with the new URL
+//       pdfjsLib
+//         .getDocument(newUrl)
+//         .promise.then((pdfDoc_) => {
+//           pdfDoc = pdfDoc_;
+//           document.querySelector("#page-count").textContent = pdfDoc.numPages;
+
+//           // Reset annotations and page number
+//           annotations = {};
+//           pageNum = 1;
+//           renderPage(pageNum);
+//         })
+//         .catch((err) => console.error(err));
+//     };
+
+//     reader.readAsDataURL(file);
+//   } else {
+//     alert("Please select a PDF file to upload.");
+//   }
+// });
+
+// Button Events
+
+document.getElementById("fileUpload").addEventListener("change", () => {
   const fileInput = document.getElementById("fileUpload");
   const file = fileInput.files[0];
 
@@ -426,9 +501,17 @@ document.getElementById("uploadButton").addEventListener("click", () => {
   }
 });
 
-// Button Events
 document.querySelector("#prev-page").addEventListener("click", showPrevPage);
 document.querySelector("#next-page").addEventListener("click", showNextPage);
 document
   .querySelector("#generate-comments")
   .addEventListener("click", generateComments);
+function showDialog() {
+  const dialog = document.querySelector(".annotation-dialog");
+  dialog.classList.add("visible");
+}
+
+function hideDialog() {
+  const dialog = document.querySelector(".annotation-dialog");
+  dialog.classList.remove("visible");
+}
