@@ -191,19 +191,33 @@ function addAnnotation(event) {
 }
 
 function generateComments() {
-  var commentsText = "";
-  Object.keys(annotations).forEach((page) => {
-    commentsText += `Page ${page}:\n`;
-    annotations[page].forEach((annotation) => {
-      commentsText += `for topic "${annotation.heading}" Reviewer said "${annotation.comment}" (ref. ${annotation.region},${annotation.y})\n`;
-    });
-  });
+  pdfDoc.getMetadata().then((metadata) => {
+    let title = metadata.info.Title;
 
-  var blob = new Blob([commentsText], { type: "text/plain;charset=utf-8" });
-  var link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "annotations.txt";
-  link.click();
+    // Replace any characters that are not suitable for a filename
+    title = title.replace(/[^a-zA-Z0-9 \-_]+/g, "");
+
+    // Concatenate the date to the title
+    const date = new Date();
+    const formattedDate = `${date.getFullYear()}-${
+      date.getMonth() + 1
+    }-${date.getDate()}`;
+    const filename = `${title}_${formattedDate}.txt`;
+
+    var commentsText = "";
+    Object.keys(annotations).forEach((page) => {
+      commentsText += `Page ${page}:\n`;
+      annotations[page].forEach((annotation) => {
+        commentsText += `for topic "${annotation.heading}" Reviewer said "${annotation.comment}" (ref. ${annotation.region},${annotation.y})\n`;
+      });
+    });
+
+    var blob = new Blob([commentsText], { type: "text/plain;charset=utf-8" });
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  });
 }
 
 document.querySelector("#tess-button").addEventListener("click", function () {
@@ -290,6 +304,37 @@ canvas.addEventListener("click", function (event) {
   const region = getRegion(x, y);
 
   console.log(`Clicked region: ${region}`); // Will print the region name
+});
+
+document.getElementById("uploadButton").addEventListener("click", () => {
+  const fileInput = document.getElementById("fileUpload");
+  const file = fileInput.files[0];
+
+  if (file) {
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const newUrl = e.target.result;
+
+      // Update the PDF document with the new URL
+      pdfjsLib
+        .getDocument(newUrl)
+        .promise.then((pdfDoc_) => {
+          pdfDoc = pdfDoc_;
+          document.querySelector("#page-count").textContent = pdfDoc.numPages;
+
+          // Reset annotations and page number
+          annotations = {};
+          pageNum = 1;
+          renderPage(pageNum);
+        })
+        .catch((err) => console.error(err));
+    };
+
+    reader.readAsDataURL(file);
+  } else {
+    alert("Please select a PDF file to upload.");
+  }
 });
 
 // Button Events
