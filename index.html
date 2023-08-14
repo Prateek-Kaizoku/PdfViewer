@@ -19,6 +19,9 @@
       <button class="btn" id="prev-page">
         <i class="fas fa-arrow-circle-left"></i> Prev Page
       </button>
+      <span class="page-info">
+        <span id="page-num"></span> of <span id="page-count"></span>
+      </span>
       <button class="btn" id="next-page">
         Next Page <i class="fas fa-arrow-circle-right"></i>
       </button>
@@ -29,10 +32,6 @@
       <button class="btn" id="tess-button">Tess</button>
       <input class="btn" type="file" id="fileUpload" accept="application/pdf" />
       <button class="btn" id="uploadButton">Upload PDF</button>
-
-      <span class="page-info">
-        Page <span id="page-num"></span> of <span id="page-count"></span>
-      </span>
     </div>
 
     <div id="pdf-container" onclick="addAnnotation(event)">

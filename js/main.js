@@ -1,5 +1,5 @@
 const url = "../docs/npdf.pdf";
-
+let dialogOpen = false;
 let boundingBoxes = [];
 let pdfDoc = null,
   pageNum = 1,
@@ -101,6 +101,7 @@ pdfjsLib
     document.querySelector(".top-bar").style.display = "none";
   });
 function addAnnotation(event) {
+  if (dialogOpen) return;
   const rect = canvas.getBoundingClientRect();
 
   let x = event.clientX - rect.left;
@@ -118,7 +119,7 @@ function addAnnotation(event) {
   const headingTextarea = document.createElement("textarea");
   headingLabel.appendChild(headingTextarea);
   dialog.appendChild(headingLabel);
-
+  dialogOpen = true;
   // Create comment input field
   const commentLabel = document.createElement("label");
   commentLabel.textContent = "Comments: ";
@@ -182,11 +183,13 @@ function addAnnotation(event) {
     }
     // Remove dialog box
     document.body.removeChild(dialog);
+    dialogOpen = false;
   });
 
   cancelButton.addEventListener("click", function () {
     // Remove dialog box without saving
     document.body.removeChild(dialog);
+    dialogOpen = false;
   });
 }
 
