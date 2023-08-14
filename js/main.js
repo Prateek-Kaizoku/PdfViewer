@@ -111,6 +111,7 @@ function addAnnotation(event) {
     alert("Please add annotations within the bounds of the page.");
     return; // Exit the function if the click is out of bounds
   }
+
   // Create dialog box
   const dialog = document.createElement("div");
   dialog.className = "annotation-dialog";
@@ -182,6 +183,7 @@ function addAnnotation(event) {
       });
     }
     // Remove dialog box
+
     document.body.removeChild(dialog);
     dialogOpen = false;
   });
@@ -190,6 +192,86 @@ function addAnnotation(event) {
     // Remove dialog box without saving
     document.body.removeChild(dialog);
     dialogOpen = false;
+  });
+}
+
+// check if the annotation is in the bounding box.
+
+// function checkAnnotationsInBoundingBox() {
+//   const offsetX = 1.5; // Horizontal offset
+//   const offsetY = 7.5; // Vertical offset
+
+//   Object.values(annotations).forEach((pageAnnotations) => {
+//     pageAnnotations.forEach((annotation) => {
+//       const x = annotation.x;
+//       const y = annotation.y;
+//       let insideBoundingBox = false;
+//       let box;
+//       for (let i = 0; i < boundingBoxes.length; i++) {
+//         box = boundingBoxes[i];
+//         if (
+//           x >= box.x0 + offsetX &&
+//           x <= box.x1 - offsetX &&
+//           y > box.y0 - offsetY &&
+//           y <= box.y1 - offsetY
+//         ) {
+//           insideBoundingBox = true;
+//           console.log(
+//             `Annotation at (${x}, ${y}) is inside bounding box number ${box.number} with offset.`
+//           );
+//           break; // Exit the loop if a bounding box is found
+//         } else {
+//           console.log(x, y, box.x0, box.x1, box.y0, box.y1);
+//           console.log(
+//             `Annotation at (${x}, ${y}) is not inside any bounding box, boxnumber ${box.number} with offset.`
+//           );
+//         }
+//       }
+//     });
+//   });
+// }
+
+function checkAnnotationsInBoundingBox() {
+  const offsetX = 1.5; // Horizontal offset
+  const offsetY = 7.5; // Vertical offset
+
+  Object.values(annotations).forEach((pageAnnotations) => {
+    pageAnnotations.forEach((annotation, index) => {
+      // Include the index
+      const x = annotation.x;
+      const y = annotation.y;
+      let insideBoundingBox = false;
+      let box;
+      for (let i = 0; i < boundingBoxes.length; i++) {
+        box = boundingBoxes[i];
+        if (
+          x >= box.x0 + offsetX &&
+          x <= box.x1 - offsetX &&
+          y >= box.y0 - offsetY &&
+          y <= box.y1 - offsetY
+        ) {
+          const textContent = box.text; // You'll need to define this function
+          const words = textContent.split(/\s+/);
+          const firstWord = words.slice(0, 3).join(" ");
+          const lastWord = words.slice(-3).join(" ");
+
+          // Store the first and last words with the annotation
+          annotation.firstWord = firstWord;
+          annotation.lastWord = lastWord;
+          insideBoundingBox = true;
+          console.log(
+            `Annotation at on line ${box.number}. and text is ${box.text}}`
+          );
+          annotation.boundingBoxNumber = box.number; // Store the bounding box number
+          pageAnnotations[index] = annotation; // Update the annotation in the pageAnnotations array
+        }
+      }
+      if (!insideBoundingBox) {
+        console.log(
+          `Annotation at (${x}, ${y}) is not inside any bounding box.`
+        );
+      }
+    });
   });
 }
 
@@ -211,7 +293,8 @@ function generateComments() {
     Object.keys(annotations).forEach((page) => {
       commentsText += `Page ${page}:\n`;
       annotations[page].forEach((annotation) => {
-        commentsText += `for topic "${annotation.heading}" Reviewer said "${annotation.comment}" (ref. ${annotation.region},${annotation.y})\n`;
+        // Include the bounding box number with each comment
+        commentsText += `for topic "${annotation.firstWord}...${annotation.lastWord}" Reviewer said "${annotation.comment} at line number ${annotation.boundingBoxNumber}" (ref. ${annotation.region},${annotation.y})\n`;
       });
     });
 
@@ -265,6 +348,7 @@ document.querySelector("#tess-button").addEventListener("click", function () {
       lines.forEach((line, index) => {
         console.log(`Paragraph ${index + 1}:`, line.text);
       });
+      checkAnnotationsInBoundingBox();
     })
     .catch((err) => console.error(err));
 });
@@ -277,7 +361,7 @@ canvas.addEventListener("mousemove", function (event) {
   for (const box of boundingBoxes) {
     if (x > box.x0 && x < box.x1 && y > box.y0 && y < box.y1) {
       // Display tooltip with the box number (or you can customize this part as needed)
-      canvas.title = `Box Number: ${box.number}`;
+      canvas.title = `Box Number: ${box.number}, Text: ${box.text}, Confidence: ${box.confidence}, Bounding Box: (${box.x0}, ${box.y0}) - (${box.x1}, ${box.y1})`;
       return;
     }
   }
@@ -285,6 +369,8 @@ canvas.addEventListener("mousemove", function (event) {
   // Clear tooltip if not hovering over any box
   canvas.title = "";
 });
+
+// Get the region name based on the x and y coordinates 1left, 2right, 3left, 4right...
 
 function getRegion(x, y) {
   const numRows = 4;
