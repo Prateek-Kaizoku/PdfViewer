@@ -225,13 +225,13 @@ document.querySelector("#tess-button").addEventListener("click", function () {
   boundingBoxes = [];
 
   Tesseract.recognize(canvas, "eng", { logger: (m) => console.log(m) })
-    .then(({ data: { words } }) => {
+    .then(({ data: { lines } }) => {
       // Use paragraphs instead of blocks
-      words.forEach((word, index) => {
+      lines.forEach((line, index) => {
         // Get the bounding box for the paragraph
         const {
           bbox: { x0, y0, x1, y1 },
-        } = word;
+        } = line;
 
         // Check if the paragraph is likely bold using a criterion, e.g., confidence
         const isBold = word.confidence > 90; // You may need to adjust this threshold
@@ -254,13 +254,13 @@ document.querySelector("#tess-button").addEventListener("click", function () {
           x1,
           y1,
           number: index + 1,
-          text: word.text, // Store the paragraph text
+          text: line.text, // Store the paragraph text
         });
       });
 
       // If you want to log the extracted paragraphs to the console:
-      words.forEach((word, index) => {
-        console.log(`Paragraph ${index + 1}:`, word.text);
+      lines.forEach((line, index) => {
+        console.log(`Paragraph ${index + 1}:`, line.text);
       });
     })
     .catch((err) => console.error(err));
