@@ -105,57 +105,67 @@ pdfjsLib
   });
 function addAnnotation(event) {
   if (dialogOpen) return;
-  const rect = canvas.getBoundingClientRect();
 
+  const rect = canvas.getBoundingClientRect();
   let x = event.clientX - rect.left;
   let y = event.clientY - rect.top;
 
   if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) {
     alert("Please add annotations within the bounds of the page.");
-    return; // Exit the function if the click is out of bounds
+    return;
   }
 
-  // Create dialog box
   const dialog = document.createElement("div");
   dialog.className = "annotation-dialog";
+
   const headingLabel = document.createElement("label");
   headingLabel.textContent = "Headings: ";
   const headingTextarea = document.createElement("textarea");
   headingLabel.appendChild(headingTextarea);
   dialog.appendChild(headingLabel);
-  dialogOpen = true;
-  // Create comment input field
+
   const commentLabel = document.createElement("label");
   commentLabel.textContent = "Comments: ";
   const commentTextarea = document.createElement("textarea");
   commentLabel.appendChild(commentTextarea);
   dialog.appendChild(commentLabel);
+
   let isDragging = false;
   let offsetX, offsetY;
 
-  dialog.addEventListener("mousedown", function (event) {
+  const startDrag = (event) => {
     isDragging = true;
-    offsetX =
-      event.pageX - dialog.getBoundingClientRect().left - window.scrollX;
-    offsetY = event.pageY - dialog.getBoundingClientRect().top - window.scrollY;
+    const clientX = event.clientX || event.touches[0].clientX;
+    const clientY = event.clientY || event.touches[0].clientY;
+    offsetX = clientX - dialog.getBoundingClientRect().left - window.scrollX;
+    offsetY = clientY - dialog.getBoundingClientRect().top - window.scrollY;
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
-  });
+    document.addEventListener("touchmove", onMouseMove);
+    document.addEventListener("touchend", onMouseUp);
+  };
+
+  dialog.addEventListener("mousedown", startDrag);
+  dialog.addEventListener("touchstart", startDrag);
 
   function onMouseMove(e) {
-    if (isDragging) {
-      const dialogHeight = dialog.offsetHeight;
-      dialog.style.left = e.clientX - offsetX + "px";
-      dialog.style.top = e.clientY - offsetY - dialogHeight + "px";
-      dialog.style.transform = "none"; // Remove the centering transform
-    }
+    if (!isDragging) return;
+    e.preventDefault();
+    const clientX = e.clientX || e.touches[0].clientX;
+    const clientY = e.clientY || e.touches[0].clientY;
+    dialog.style.left = clientX - offsetX + "px";
+    dialog.style.top = clientY - offsetY - dialog.offsetHeight + "px";
+    dialog.style.transform = "none";
   }
 
   function onMouseUp() {
     isDragging = false;
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
+    document.removeEventListener("touchmove", onMouseMove);
+    document.removeEventListener("touchend", onMouseUp);
   }
+
   const submitButton = document.createElement("button");
   submitButton.textContent = "Submit";
   const cancelButton = document.createElement("button");
@@ -164,86 +174,173 @@ function addAnnotation(event) {
   dialog.appendChild(submitButton);
   dialog.appendChild(cancelButton);
   document.body.appendChild(dialog);
-  requestAnimationFrame(function () {
-    dialog.classList.add("visible"); // Add "visible" class
+  requestAnimationFrame(() => {
+    dialog.classList.add("visible");
   });
 
   submitButton.addEventListener("click", function () {
-    const region = getRegion(x, y);
-    const headingText = headingTextarea.value;
-    const commentText = commentTextarea.value;
-    const annotationText = `Heading: ${headingTextarea.value}\nComment: ${commentTextarea.value}`;
-    if (headingText && commentText) {
-      var star = document.createElement("div");
-      star.className = "star";
-      star.innerHTML = "&#9733;"; // Unicode star character
-
-      // Create annotation element (hidden by default)
-      var annotation = document.createElement("div");
-      annotation.className = "annotation";
-      annotation.textContent = annotationText;
-      annotation.style.display = "none";
-
-      // Positioning
-      x -= 10; // Centering adjustment
-      y -= 10;
-      star.style.left = x + "px";
-      star.style.top = y + "px";
-      document.getElementById("pdf-container").appendChild(star);
-      star.appendChild(annotation);
-
-      // Show annotation on hover
-      star.addEventListener("mouseover", function () {
-        annotation.style.display = "block";
-      });
-      star.addEventListener("mouseout", function () {
-        annotation.style.display = "none";
-      });
-
-      // Store the annotation for the current page
-      if (!annotations[pageNum]) {
-        annotations[pageNum] = [];
-      }
-      annotations[pageNum].push({
-        heading: headingText,
-        comment: commentText,
-        element: star,
-        x: x,
-        y: y,
-        region: region,
-      });
-      checkAnnotationsInBoundingBox();
-    }
-    // Remove dialog box
-
-    dialog.classList.remove("visible");
-
-    // Wait for the transition to complete before actually removing the dialog
-    dialog.addEventListener(
-      "transitionend",
-      function () {
-        document.body.removeChild(dialog);
-        dialogOpen = false;
-      },
-      { once: true }
-    );
+    // ... [rest of your submit logic]
+    removeDialog(dialog);
   });
 
   cancelButton.addEventListener("click", function () {
-    // Remove dialog box without saving
-    dialog.classList.remove("visible");
-
-    // Wait for the transition to complete before actually removing the dialog
-    dialog.addEventListener(
-      "transitionend",
-      function () {
-        document.body.removeChild(dialog);
-        dialogOpen = false;
-      },
-      { once: true }
-    );
+    removeDialog(dialog);
   });
 }
+
+function removeDialog(dialog) {
+  dialog.classList.remove("visible");
+  dialog.addEventListener(
+    "transitionend",
+    () => {
+      document.body.removeChild(dialog);
+      dialogOpen = false;
+    },
+    { once: true }
+  );
+}
+
+// function addAnnotation(event) {
+//   if (dialogOpen) return;
+//   const rect = canvas.getBoundingClientRect();
+
+//   let x = event.clientX - rect.left;
+//   let y = event.clientY - rect.top;
+
+//   if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) {
+//     alert("Please add annotations within the bounds of the page.");
+//     return; // Exit the function if the click is out of bounds
+//   }
+
+//   // Create dialog box
+//   const dialog = document.createElement("div");
+//   dialog.className = "annotation-dialog";
+//   const headingLabel = document.createElement("label");
+//   headingLabel.textContent = "Headings: ";
+//   const headingTextarea = document.createElement("textarea");
+//   headingLabel.appendChild(headingTextarea);
+//   dialog.appendChild(headingLabel);
+//   dialogOpen = true;
+//   // Create comment input field
+//   const commentLabel = document.createElement("label");
+//   commentLabel.textContent = "Comments: ";
+//   const commentTextarea = document.createElement("textarea");
+//   commentLabel.appendChild(commentTextarea);
+//   dialog.appendChild(commentLabel);
+//   let isDragging = false;
+//   let offsetX, offsetY;
+
+//   dialog.addEventListener("mousedown", function (event) {
+//     isDragging = true;
+//     offsetX =
+//       event.pageX - dialog.getBoundingClientRect().left - window.scrollX;
+//     offsetY = event.pageY - dialog.getBoundingClientRect().top - window.scrollY;
+//     document.addEventListener("mousemove", onMouseMove);
+//     document.addEventListener("mouseup", onMouseUp);
+//   });
+
+//   function onMouseMove(e) {
+//     if (isDragging) {
+//       const dialogHeight = dialog.offsetHeight;
+//       dialog.style.left = e.clientX - offsetX + "px";
+//       dialog.style.top = e.clientY - offsetY - dialogHeight + "px";
+//       dialog.style.transform = "none"; // Remove the centering transform
+//     }
+//   }
+
+//   function onMouseUp() {
+//     isDragging = false;
+//     document.removeEventListener("mousemove", onMouseMove);
+//     document.removeEventListener("mouseup", onMouseUp);
+//   }
+//   const submitButton = document.createElement("button");
+//   submitButton.textContent = "Submit";
+//   const cancelButton = document.createElement("button");
+//   cancelButton.textContent = "Cancel";
+
+//   dialog.appendChild(submitButton);
+//   dialog.appendChild(cancelButton);
+//   document.body.appendChild(dialog);
+//   requestAnimationFrame(function () {
+//     dialog.classList.add("visible"); // Add "visible" class
+//   });
+
+//   submitButton.addEventListener("click", function () {
+//     const region = getRegion(x, y);
+//     const headingText = headingTextarea.value;
+//     const commentText = commentTextarea.value;
+//     const annotationText = `Heading: ${headingTextarea.value}\nComment: ${commentTextarea.value}`;
+//     if (headingText && commentText) {
+//       var star = document.createElement("div");
+//       star.className = "star";
+//       star.innerHTML = "&#9733;"; // Unicode star character
+
+//       // Create annotation element (hidden by default)
+//       var annotation = document.createElement("div");
+//       annotation.className = "annotation";
+//       annotation.textContent = annotationText;
+//       annotation.style.display = "none";
+
+//       // Positioning
+//       x -= 10; // Centering adjustment
+//       y -= 10;
+//       star.style.left = x + "px";
+//       star.style.top = y + "px";
+//       document.getElementById("pdf-container").appendChild(star);
+//       star.appendChild(annotation);
+
+//       // Show annotation on hover
+//       star.addEventListener("mouseover", function () {
+//         annotation.style.display = "block";
+//       });
+//       star.addEventListener("mouseout", function () {
+//         annotation.style.display = "none";
+//       });
+
+//       // Store the annotation for the current page
+//       if (!annotations[pageNum]) {
+//         annotations[pageNum] = [];
+//       }
+//       annotations[pageNum].push({
+//         heading: headingText,
+//         comment: commentText,
+//         element: star,
+//         x: x,
+//         y: y,
+//         region: region,
+//       });
+//       checkAnnotationsInBoundingBox();
+//     }
+//     // Remove dialog box
+
+//     dialog.classList.remove("visible");
+
+//     // Wait for the transition to complete before actually removing the dialog
+//     dialog.addEventListener(
+//       "transitionend",
+//       function () {
+//         document.body.removeChild(dialog);
+//         dialogOpen = false;
+//       },
+//       { once: true }
+//     );
+//   });
+
+//   cancelButton.addEventListener("click", function () {
+//     // Remove dialog box without saving
+//     dialog.classList.remove("visible");
+
+//     // Wait for the transition to complete before actually removing the dialog
+//     dialog.addEventListener(
+//       "transitionend",
+//       function () {
+//         document.body.removeChild(dialog);
+//         dialogOpen = false;
+//       },
+//       { once: true }
+//     );
+//   });
+// }
 
 // check if the annotation is in the bounding box.
 
