@@ -154,7 +154,7 @@ function addAnnotation(event) {
     const clientX = e.clientX || e.touches[0].clientX;
     const clientY = e.clientY || e.touches[0].clientY;
     dialog.style.left = clientX - offsetX + "px";
-    dialog.style.top = clientY - offsetY - dialog.offsetHeight + "px";
+    dialog.style.top = clientY - offsetY + "px";
     dialog.style.transform = "none";
   }
 
