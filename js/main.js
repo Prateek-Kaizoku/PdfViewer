@@ -117,6 +117,13 @@ function addAnnotation(event) {
 
   const dialog = document.createElement("div");
   dialog.className = "annotation-dialog";
+  dialog.addEventListener(
+    "touchmove",
+    function (e) {
+      e.preventDefault();
+    },
+    { passive: false }
+  );
 
   const headingLabel = document.createElement("label");
   headingLabel.textContent = "Headings: ";
