@@ -1,4 +1,5 @@
 const url = "../docs/npdf.pdf";
+let scannedPages = [];
 let dialogOpen = false;
 let boundingBoxes = [];
 let pdfDoc = null,
@@ -69,6 +70,7 @@ const showPrevPage = () => {
     return;
   }
   pageNum--;
+  handleTessButtonClick();
   queueRenderPage(pageNum);
 };
 
@@ -78,6 +80,7 @@ const showNextPage = () => {
     return;
   }
   pageNum++;
+  handleTessButtonClick();
   queueRenderPage(pageNum);
 };
 
@@ -128,27 +131,31 @@ function addAnnotation(event) {
   commentLabel.appendChild(commentTextarea);
   dialog.appendChild(commentLabel);
   let isDragging = false;
+  let offsetX, offsetY;
 
   dialog.addEventListener("mousedown", function (event) {
     isDragging = true;
-    var offsetX = event.clientX - dialog.getBoundingClientRect().left;
-    var offsetY = event.clientY - dialog.getBoundingClientRect().top;
-
-    function onMouseMove(e) {
-      if (isDragging) {
-        dialog.style.left = e.clientX - offsetX + "px";
-        dialog.style.top = e.clientY - offsetY + "px";
-        dialog.style.transform = "none"; // Remove the centering transform
-      }
-    }
-
+    offsetX =
+      event.pageX - dialog.getBoundingClientRect().left - window.scrollX;
+    offsetY = event.pageY - dialog.getBoundingClientRect().top - window.scrollY;
     document.addEventListener("mousemove", onMouseMove);
-
-    dialog.addEventListener("mouseup", function () {
-      isDragging = false;
-      document.removeEventListener("mousemove", onMouseMove);
-    });
+    document.addEventListener("mouseup", onMouseUp);
   });
+
+  function onMouseMove(e) {
+    if (isDragging) {
+      const dialogHeight = dialog.offsetHeight;
+      dialog.style.left = e.clientX - offsetX + "px";
+      dialog.style.top = e.clientY - offsetY - dialogHeight + "px";
+      dialog.style.transform = "none"; // Remove the centering transform
+    }
+  }
+
+  function onMouseUp() {
+    isDragging = false;
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+  }
   const submitButton = document.createElement("button");
   submitButton.textContent = "Submit";
   const cancelButton = document.createElement("button");
@@ -205,6 +212,7 @@ function addAnnotation(event) {
         y: y,
         region: region,
       });
+      checkAnnotationsInBoundingBox();
     }
     // Remove dialog box
 
@@ -316,7 +324,6 @@ function checkAnnotationsInBoundingBox() {
     });
   });
 }
-
 function generateComments() {
   pdfDoc.getMetadata().then((metadata) => {
     let title = metadata.info.Title;
@@ -331,13 +338,33 @@ function generateComments() {
     }-${date.getDate()}`;
     const filename = `${title}_${formattedDate}.txt`;
 
-    var commentsText = "";
-    Object.keys(annotations).forEach((page) => {
-      commentsText += `Page ${page}:\n`;
+    let sortedAnnotations = [];
+
+    // Flatten the annotations and push them to the sortedAnnotations array
+    for (let page in annotations) {
       annotations[page].forEach((annotation) => {
-        // Include the bounding box number with each comment
-        commentsText += `for topic "${annotation.firstWord}...${annotation.lastWord}" Reviewer said "${annotation.comment} at line number ${annotation.boundingBoxNumber}" (ref. ${annotation.region},${annotation.y})\n`;
+        annotation.page = page; // Add the page number to each annotation
+        sortedAnnotations.push(annotation);
       });
+    }
+
+    // Sort the annotations by page and then by line number
+    sortedAnnotations.sort((a, b) => {
+      if (a.page === b.page) {
+        return a.boundingBoxNumber - b.boundingBoxNumber;
+      }
+      return a.page - b.page;
+    });
+
+    // Generate the comments from the sorted annotations
+    let commentsText = "";
+    let currentPage = null;
+    sortedAnnotations.forEach((annotation) => {
+      if (currentPage !== annotation.page) {
+        commentsText += `Page ${annotation.page}:\n`;
+        currentPage = annotation.page;
+      }
+      commentsText += `for topic "${annotation.firstWord}...${annotation.lastWord}" Reviewer said "${annotation.comment} at line number ${annotation.boundingBoxNumber}" (ref. ${annotation.region},${annotation.y})\n`;
     });
 
     var blob = new Blob([commentsText], { type: "text/plain;charset=utf-8" });
@@ -348,7 +375,42 @@ function generateComments() {
   });
 }
 
-document.querySelector("#tess-button").addEventListener("click", function () {
+// function generateComments() {
+//   pdfDoc.getMetadata().then((metadata) => {
+//     let title = metadata.info.Title;
+
+//     // Replace any characters that are not suitable for a filename
+//     title = title.replace(/[^a-zA-Z0-9 \-_]+/g, "");
+
+//     // Concatenate the date to the title
+//     const date = new Date();
+//     const formattedDate = `${date.getFullYear()}-${
+//       date.getMonth() + 1
+//     }-${date.getDate()}`;
+//     const filename = `${title}_${formattedDate}.txt`;
+
+//     var commentsText = "";
+//     Object.keys(annotations).forEach((page) => {
+//       commentsText += `Page ${page}:\n`;
+//       annotations[page].forEach((annotation) => {
+//         // Include the bounding box number with each comment
+//         l      });
+//     });
+
+//     var blob = new Blob([commentsText], { type: "text/plain;charset=utf-8" });
+//     var link = document.createElement("a");
+//     link.href = URL.createObjectURL(blob);
+//     link.download = filename;
+//     link.click();
+//   });
+// }
+
+function handleTessButtonClick() {
+  // Check if the page has already been scanned
+  if (scannedPages.includes(pageNum)) {
+    console.log(`Page ${pageNum} has already been scanned.`);
+    return;
+  }
   // Clear previous bounding boxes
   boundingBoxes = [];
 
@@ -367,7 +429,7 @@ document.querySelector("#tess-button").addEventListener("click", function () {
         // Draw the bounding box on the canvas
         ctx.beginPath();
         ctx.rect(x0, y0, x1 - x0, y1 - y0);
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 0.1;
         ctx.strokeStyle = isBold ? "black" : "red"; // Set color based on boldness
         ctx.stroke();
 
@@ -390,10 +452,11 @@ document.querySelector("#tess-button").addEventListener("click", function () {
       lines.forEach((line, index) => {
         console.log(`Paragraph ${index + 1}:`, line.text);
       });
+      scannedPages.push(pageNum);
       checkAnnotationsInBoundingBox();
     })
     .catch((err) => console.error(err));
-});
+}
 
 canvas.addEventListener("mousemove", function (event) {
   const x = event.clientX - canvas.getBoundingClientRect().left;
@@ -491,6 +554,7 @@ document.getElementById("fileUpload").addEventListener("change", () => {
           annotations = {};
           pageNum = 1;
           renderPage(pageNum);
+          handleTessButtonClick();
         })
         .catch((err) => console.error(err));
     };
