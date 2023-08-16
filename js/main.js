@@ -328,55 +328,55 @@ function removeDialog(dialog) {
 //     dialog.classList.add("visible"); // Add "visible" class
 //   });
 
-submitButton.addEventListener("click", function () {
-  const region = getRegion(x, y);
-  const headingText = headingTextarea.value;
-  const commentText = commentTextarea.value;
-  const annotationText = `Heading: ${headingTextarea.value}\nComment: ${commentTextarea.value}`;
-  if (headingText && commentText) {
-    var star = document.createElement("div");
-    star.className = "star";
-    star.innerHTML = "&#9733;"; // Unicode star character
+// submitButton.addEventListener("click", function () {
+//   const region = getRegion(x, y);
+//   const headingText = headingTextarea.value;
+//   const commentText = commentTextarea.value;
+//   const annotationText = `Heading: ${headingTextarea.value}\nComment: ${commentTextarea.value}`;
+//   if (headingText && commentText) {
+//     var star = document.createElement("div");
+//     star.className = "star";
+//     star.innerHTML = "&#9733;"; // Unicode star character
 
-    // Create annotation element (hidden by default)
-    var annotation = document.createElement("div");
-    annotation.className = "annotation";
-    annotation.textContent = annotationText;
-    annotation.style.display = "none";
+//     // Create annotation element (hidden by default)
+//     var annotation = document.createElement("div");
+//     annotation.className = "annotation";
+//     annotation.textContent = annotationText;
+//     annotation.style.display = "none";
 
-    // Positioning
-    x -= 10; // Centering adjustment
-    y -= 10;
-    star.style.left = x + "px";
-    star.style.top = y + "px";
-    document.getElementById("pdf-container").appendChild(star);
-    star.appendChild(annotation);
+//     // Positioning
+//     x -= 10; // Centering adjustment
+//     y -= 10;
+//     star.style.left = x + "px";
+//     star.style.top = y + "px";
+//     document.getElementById("pdf-container").appendChild(star);
+//     star.appendChild(annotation);
 
-    // Show annotation on hover
-    star.addEventListener("mouseover", function () {
-      annotation.style.display = "block";
-    });
-    star.addEventListener("mouseout", function () {
-      annotation.style.display = "none";
-    });
+//     // Show annotation on hover
+//     star.addEventListener("mouseover", function () {
+//       annotation.style.display = "block";
+//     });
+//     star.addEventListener("mouseout", function () {
+//       annotation.style.display = "none";
+//     });
 
-    // Store the annotation for the current page
-    if (!annotations[pageNum]) {
-      annotations[pageNum] = [];
-    }
-    annotations[pageNum].push({
-      heading: headingText,
-      comment: commentText,
-      element: star,
-      x: x,
-      y: y,
-      region: region,
-    });
-    checkAnnotationsInBoundingBox();
-  }
-  // Remove dialog box
-  removeDialog(dialog);
-});
+//     // Store the annotation for the current page
+//     if (!annotations[pageNum]) {
+//       annotations[pageNum] = [];
+//     }
+//     annotations[pageNum].push({
+//       heading: headingText,
+//       comment: commentText,
+//       element: star,
+//       x: x,
+//       y: y,
+//       region: region,
+//     });
+//     checkAnnotationsInBoundingBox();
+//   }
+//   // Remove dialog box
+//   removeDialog(dialog);
+// });
 
 //   cancelButton.addEventListener("click", function () {
 //     // Remove dialog box without saving
