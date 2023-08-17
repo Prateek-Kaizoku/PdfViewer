@@ -34,9 +34,13 @@
         id="fileUpload"
         accept="application/pdf"
         style="display: none"
+        onchange="handleFileUpload(event)"
       />
-    </div>
 
+      <button id="zoom-in" class="btn" onclick="stichToPdf()">
+        <i class="fas fa-arrow-circle-left"></i> Stich to PDF
+      </button>
+    </div>
     <div id="pdf-container" onclick="addAnnotation(event)">
       <canvas id="pdf-render"></canvas>
       <canvas
@@ -47,5 +51,6 @@
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script src="js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@latest/dist/pdf-lib.min.js"></script>
   </body>
 </html>

@@ -1,4 +1,5 @@
 const url = "../docs/npdf.pdf";
+let uploadedPdfBuffer = null;
 let scannedPages = [];
 let dialogOpen = false;
 let boundingBoxes = [];
@@ -242,7 +243,6 @@ function addAnnotation(event) {
       },
       { once: true }
     );
-
     removeDialog(dialog);
   });
 
@@ -256,11 +256,18 @@ function removeDialog(dialog) {
   dialog.addEventListener(
     "transitionend",
     () => {
-      document.body.removeChild(dialog);
+      dialog.remove();
       dialogOpen = false;
     },
     { once: true }
   );
+}
+
+function clearAnnotations() {
+  const stars = document.querySelectorAll(".star");
+  stars.forEach((star) => star.remove());
+  annotations = {}; // Assuming annotations is a global object storing your annotations
+  scannedPages = [];
 }
 
 // function addAnnotation(event) {
@@ -524,6 +531,48 @@ function generateComments() {
   });
 }
 
+async function stichToPdf() {
+  let sortedAnnotations = [];
+
+  for (let page in annotations) {
+    annotations[page].forEach((annotation) => {
+      annotation.page = page; // Add the page number to each annotation
+      sortedAnnotations.push(annotation);
+    });
+  }
+  sortedAnnotations.sort((a, b) => {
+    if (a.page === b.page) {
+      return a.boundingBoxNumber - b.boundingBoxNumber;
+    }
+    return a.page - b.page;
+  });
+
+  const pdfDoc1 = await PDFLib.PDFDocument.load(uploadedPdfBuffer);
+  const [pageWidth, pageHeight] = [600, 800];
+  const newPage = pdfDoc1.addPage([pageWidth, pageHeight]);
+  let x = 50;
+  let y = pageHeight - 100;
+
+  sortedAnnotations.forEach((annotation) => {
+    const comment = `Page ${annotation.page}:\nfor topic "${annotation.firstWord}...${annotation.lastWord}" Reviewer said "${annotation.comment} at line number ${annotation.boundingBoxNumber}" (ref. ${annotation.region},${annotation.y})\n`;
+    newPage.drawText(comment, {
+      x: x,
+      y: y,
+      size: 10,
+      color: PDFLib.rgb(0, 0, 0),
+    });
+    y -= 50;
+  });
+  const modifiedPdfBytes = await pdfDoc1.save();
+
+  // Download the modified PDF
+  const blob = new Blob([modifiedPdfBytes], { type: "application/pdf" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "modified.pdf";
+  link.click();
+}
+
 // function generateComments() {
 //   pdfDoc.getMetadata().then((metadata) => {
 //     let title = metadata.info.Title;
@@ -554,9 +603,21 @@ function generateComments() {
 //   });
 // }
 
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      uploadedPdfBuffer = e.target.result;
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
 function handleTessButtonClick() {
   // Check if the page has already been scanned
   if (scannedPages.includes(pageNum)) {
+    checkAnnotationsInBoundingBox();
     console.log(`Page ${pageNum} has already been scanned.`);
     return;
   }
@@ -683,6 +744,7 @@ canvas.addEventListener("click", function (event) {
 // Button Events
 
 document.getElementById("fileUpload").addEventListener("change", () => {
+  clearAnnotations();
   const fileInput = document.getElementById("fileUpload");
   const file = fileInput.files[0];
 
