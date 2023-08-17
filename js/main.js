@@ -115,6 +115,9 @@ pdfjsLib
     // Remove top bar
     document.querySelector(".top-bar").style.display = "none";
   });
+
+// Add annotations functionality
+
 function addAnnotation(event) {
   if (dialogOpen) return;
 

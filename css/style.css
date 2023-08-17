@@ -14,17 +14,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
 .top-bar {
   background: #333;
   color: #fff;
-  padding: 1rem;
+  padding: 1.69rem;
+  margin: 1rem 0 1rem 0;
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  align-items: center;
+  align-items: inherit;
 
 }
 .custom-file-upload {
@@ -49,9 +50,12 @@
   outline: none;
   cursor: pointer;
   padding: 0.7rem 2rem;
+  font-size: large;
   border-radius: var(--button-radius);
   display: inline-block;
   transition: opacity var(--transition-speed); /* smooth transition */
+  margin-right: 0.5rem;
+  margin-left: 0.5rem;
 }
 
 .btn:hover {
@@ -71,9 +75,10 @@
 #pdf-container {
   position: relative;
   width: 100%;
-  display: flex;
+  display: block;
+  /* display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; */
 }
 
 .star {
@@ -102,7 +107,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 400px;
+  width: 220px;
   height: 200px; /* Fixed height */
   max-width: 90%; /* A bit of responsiveness */
   border: 2px solid #000;
@@ -154,7 +159,10 @@
 
 @media screen and (max-width: 600px) and (orientation: portrait) {
   .btn {
-    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.5rem;
+    border-radius: 10px;
+    min-width: 100px;
+    padding: 5px 10px;
   }
 
   .annotation-dialog {
@@ -164,8 +172,9 @@
     background: #333;
     color: #fff;
     padding: 1rem;
-    width: 100%;
-  }
+    width: 100%; 
+   }
+
   #pdf-container {
     position: relative;
     width: 100%;
@@ -174,7 +183,11 @@
 }
 @media screen and (max-width: 767px) and (orientation: landscape) {
   .btn {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.5rem;
+    margin: 0.5rem 0.5rem;
+    font-size: large;
+    border: #000;
+    border-radius: 10px;
   }
 
   .annotation-dialog {
@@ -185,6 +198,9 @@
     color: #fff;
     padding: 1rem;
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
   }
   #pdf-container {
     position: relative;
