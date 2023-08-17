@@ -512,7 +512,7 @@ function generateComments() {
         commentsText += `Page ${annotation.page}:\n`;
         currentPage = annotation.page;
       }
-      commentsText += `for topic "${annotation.firstWord}...${annotation.lastWord}" Reviewer said "${annotation.comment} at line number ${annotation.boundingBoxNumber}" (ref. ${annotation.region},${annotation.y})\n`;
+      commentsText += `for topic "${annotation.heading}" Reviewer said "${annotation.comment} at line number ${annotation.boundingBoxNumber}" (ref. ${annotation.region},${annotation.y}line ref. ${annotation.firstWord}...${annotation.lastWord} )\n`;
     });
 
     var blob = new Blob([commentsText], { type: "text/plain;charset=utf-8" });
