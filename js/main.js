@@ -118,13 +118,6 @@ function addAnnotation(event) {
 
   const dialog = document.createElement("div");
   dialog.className = "annotation-dialog";
-  dialog.addEventListener(
-    "touchmove",
-    function (e) {
-      e.preventDefault();
-    },
-    { passive: false }
-  );
 
   const headingLabel = document.createElement("label");
   headingLabel.textContent = "Headings: ";
@@ -140,7 +133,13 @@ function addAnnotation(event) {
 
   let isDragging = false;
   let offsetX, offsetY;
-
+  dialog.addEventListener(
+    "touchmove",
+    function (e) {
+      e.preventDefault();
+    },
+    { passive: false }
+  );
   const startDrag = (event) => {
     isDragging = true;
     const clientX = event.clientX || event.touches[0].clientX;
@@ -185,6 +184,7 @@ function addAnnotation(event) {
   requestAnimationFrame(() => {
     dialog.classList.add("visible");
   });
+  dialogOpen = true;
 
   submitButton.addEventListener("click", function () {
     const region = getRegion(x, y);
@@ -235,14 +235,6 @@ function addAnnotation(event) {
     // Remove dialog box
 
     // Wait for the transition to complete before actually removing the dialog
-    dialog.addEventListener(
-      "transitionend",
-      function () {
-        document.body.removeChild(dialog);
-        dialogOpen = false;
-      },
-      { once: true }
-    );
     removeDialog(dialog);
   });
 
