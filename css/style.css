@@ -146,4 +146,10 @@
   .annotation-dialog {
     width: 90%;
   }
+  .top-bar {
+    background: #333;
+    color: #fff;
+    padding: 1rem;
+    width: 100%;
+  }
 }
