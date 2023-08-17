@@ -620,7 +620,7 @@ function handleFileUpload(event) {
   }
 }
 
-function handleTessButtonClick() {
+async function handleTessButtonClick() {
   // Check if the page has already been scanned
   if (scannedPages.includes(pageNum)) {
     checkAnnotationsInBoundingBox();
@@ -631,58 +631,61 @@ function handleTessButtonClick() {
   boundingBoxes = [];
   const button = document.getElementById("next-page");
 
-  Tesseract.recognize(canvas, "eng", {
-    logger: (m) => {
-      console.log(m);
-      if (m.status === "recognizing text") {
-        button.style.setProperty("--primary-color", "green"); // or any other style changes you want
-        button.textContent = "Processing...";
-      }
-    },
-  })
-    .then(({ data: { lines } }) => {
-      // Use paragraphs instead of blocks
-      button.style.setProperty("--primary-color", "red"); // reset to default color
-      button.textContent = "Next-Page"; // or whatever the original text was
-      lines.forEach((line, index) => {
-        // Get the bounding box for the paragraph
-        const {
-          bbox: { x0, y0, x1, y1 },
-        } = line;
+  try {
+    const result = await Tesseract.recognize(canvas, "eng", {
+      logger: (m) => {
+        console.log(m);
+        if (m.status === "recognizing text") {
+          button.style.setProperty("--primary-color", "green"); // or any other style changes you want
+          button.textContent = "Processing...";
+        }
+      },
+    });
 
-        // Check if the paragraph is likely bold using a criterion, e.g., confidence
-        const isBold = line.confidence > 90; // You may need to adjust this threshold
+    const { lines } = result.data;
 
-        // Draw the bounding box on the canvas
-        ctx.beginPath();
-        ctx.rect(x0, y0, x1 - x0, y1 - y0);
-        ctx.lineWidth = 0.1;
-        ctx.strokeStyle = isBold ? "black" : "red"; // Set color based on boldness
-        ctx.stroke();
+    // Use paragraphs instead of blocks
+    button.style.setProperty("--primary-color", "red"); // reset to default color
+    button.textContent = "Next-Page"; // or whatever the original text was
+    lines.forEach((line, index) => {
+      // Get the bounding box for the paragraph
+      const {
+        bbox: { x0, y0, x1, y1 },
+      } = line;
 
-        // Draw the serial number inside the box
-        ctx.fillStyle = "blue";
-        ctx.fillText(index + 1, x0 + 5, y0 + 15);
+      // Check if the paragraph is likely bold using a criterion, e.g., confidence
 
-        // Store the bounding box for later use
-        boundingBoxes.push({
-          x0,
-          y0,
-          x1,
-          y1,
-          number: index + 1,
-          text: line.text, // Store the paragraph text
-        });
+      // Draw the bounding box on the canvas
+      ctx.beginPath();
+      ctx.rect(x0, y0, x1 - x0, y1 - y0);
+      ctx.lineWidth = 0.1;
+      ctx.strokeStyle = "red"; // Set color based on boldness
+      ctx.stroke();
+
+      // Draw the serial number inside the box
+      ctx.fillStyle = "blue";
+      ctx.fillText(index + 1, x0 + 5, y0 + 15);
+
+      // Store the bounding box for later use
+      boundingBoxes.push({
+        x0,
+        y0,
+        x1,
+        y1,
+        number: index + 1,
+        text: line.text, // Store the paragraph text
       });
+    });
 
-      // If you want to log the extracted paragraphs to the console:
-      lines.forEach((line, index) => {
-        console.log(`Paragraph ${index + 1}:`, line.text);
-      });
-      scannedPages.push(pageNum);
-      checkAnnotationsInBoundingBox();
-    })
-    .catch((err) => console.error(err));
+    // If you want to log the extracted paragraphs to the console:
+    lines.forEach((line, index) => {
+      console.log(`Paragraph ${index + 1}:`, line.text);
+    });
+    scannedPages.push(pageNum);
+    checkAnnotationsInBoundingBox();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 canvas.addEventListener("mousemove", function (event) {
