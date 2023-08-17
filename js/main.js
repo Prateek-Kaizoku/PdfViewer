@@ -83,6 +83,17 @@ const showNextPage = () => {
   pageNum++;
   handleTessButtonClick();
   queueRenderPage(pageNum);
+  const button = document.getElementById("next-page");
+
+  if (scannedPages.includes(pageNum)) {
+    button.style.setProperty("--primary-color", "red");
+    // or any color to indicate it's scanned
+  } else {
+    button.style.setProperty(
+      "--primary-color",
+      "linear-gradient(90deg, #1e3c72 0%, #2a5298 100%"
+    ); // reset to default color
+  }
 };
 
 // Get Document
@@ -615,10 +626,21 @@ function handleTessButtonClick() {
   }
   // Clear previous bounding boxes
   boundingBoxes = [];
+  const button = document.getElementById("next-page");
 
-  Tesseract.recognize(canvas, "eng", { logger: (m) => console.log(m) })
+  Tesseract.recognize(canvas, "eng", {
+    logger: (m) => {
+      console.log(m);
+      if (m.status === "recognizing text") {
+        button.style.setProperty("--primary-color", "green"); // or any other style changes you want
+        button.textContent = "Processing...";
+      }
+    },
+  })
     .then(({ data: { lines } }) => {
       // Use paragraphs instead of blocks
+      button.style.setProperty("--primary-color", "red"); // reset to default color
+      button.textContent = "Next-Page"; // or whatever the original text was
       lines.forEach((line, index) => {
         // Get the bounding box for the paragraph
         const {
