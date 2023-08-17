@@ -83,7 +83,7 @@ const showNextPage = () => {
   pageNum++;
   handleTessButtonClick();
   queueRenderPage(pageNum);
-  const button = document.getElementById("next-page");
+  const button = document.getElementById("next-page"); //make sure it is the right button!!!
 
   if (scannedPages.includes(pageNum)) {
     button.style.setProperty("--primary-color", "red");
