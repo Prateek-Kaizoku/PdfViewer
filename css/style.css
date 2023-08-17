@@ -13,8 +13,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-
-
 }
 
 .top-bar {
@@ -71,6 +69,7 @@
 
 #pdf-container {
   position: relative;
+  width: 100%;
 }
 
 .star {
@@ -161,6 +160,6 @@
     background: #333;
     color: #fff;
     padding: 1rem;
-    width: 100%;
+    width: 200%;
   }
 }
