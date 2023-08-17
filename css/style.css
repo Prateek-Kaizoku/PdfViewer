@@ -107,7 +107,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 220px;
+  width: 300px;
   height: 200px; /* Fixed height */
   max-width: 90%; /* A bit of responsiveness */
   border: 2px solid #000;
