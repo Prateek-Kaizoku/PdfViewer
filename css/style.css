@@ -7,7 +7,7 @@
 
 .bodyTag {
   background-color: #333;
-  margin: 0;
+  margin-top: 10px;
   padding: 0;
   box-sizing: border-box;
   width: 100%;
@@ -20,12 +20,10 @@
 .top-bar {
   background: #333;
   color: #fff;
-  padding: 1.69rem;
-  margin: 1rem 0 1rem 0;
+  padding: 10 rem;
+  margin: 1.5rem;
   width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: inherit;
+  display: block;
 
 }
 .custom-file-upload {
@@ -76,20 +74,21 @@
   position: relative;
   width: 100%;
   display: block;
-  /* display: flex;
-  flex-direction: column;
-  align-items: center; */
+  flex-direction: row;
+  align-items: center;
+  margin-top: 5%;
 }
 
 .star {
   position: absolute;
   cursor: pointer;
   font-size: 20px;
+  color: #000;
 }
 
 .annotation {
   position: absolute;
-  background: yellow;
+  background: rgba(255, 255, 0, 0.721);
   border: 1px solid black;
   padding: 5px;
   display: none;
@@ -99,7 +98,7 @@
   display: block;
   font-size: 14px; /* You can adjust this value */
   margin-bottom: 10px; /* Adds some space below the label */
-  color: #fff; /* This makes the label text white to match the dialog's text color */
+  color: #ffffffe4; /* This makes the label text white to match the dialog's text color */
 }
 
 .annotation-dialog {
@@ -109,13 +108,13 @@
   transform: translate(-50%, -50%);
   width: 300px;
   height: 200px; /* Fixed height */
-  max-width: 90%; /* A bit of responsiveness */
+  max-width: 90%; /* A bit of responsiveness */ 
   border: 2px solid #000;
   padding: 20px;
   background: linear-gradient(160deg, #1a1a1a, #0d0d0d);
   border-radius: 15px;
   font-family: 'Arial', sans-serif;
-  color: #fff;
+  color: #f1eded;
   overflow-y: hidden; /* No vertical scrollbar */
   z-index: 1000;
   opacity: 0; /* Set initial opacity to 0 */
@@ -156,6 +155,17 @@
 .annotation-dialog button:last-child:hover {
   background-color: #999;
 }
+
+#templateContainer{
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 1%;
+}
+
 
 @media screen and (max-width: 600px) and (orientation: portrait) {
   .btn {
@@ -208,3 +218,5 @@
     display: block;
   }
 }
+
+

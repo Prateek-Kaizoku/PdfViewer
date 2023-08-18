@@ -519,15 +519,29 @@ function generateComments() {
     });
 
     // Generate the comments from the sorted annotations
+    let userTemplate = document.getElementById("templateInput").value;
+
     let commentsText = "";
     let currentPage = null;
+
     sortedAnnotations.forEach((annotation) => {
       if (currentPage !== annotation.page) {
         commentsText += `Page ${annotation.page}:\n`;
         currentPage = annotation.page;
       }
-      commentsText += `for topic "${annotation.heading}" Reviewer said "${annotation.comment} at line number ${annotation.boundingBoxNumber}" (ref. ${annotation.region},${annotation.y}line ref. ${annotation.firstWord}...${annotation.lastWord} )\n`;
+
+      // Embed variables into user template
+      let customComment = userTemplate
+        .replace("{heading}", annotation.heading)
+        .replace("{comment}", annotation.comment)
+        .replace("{boundingBoxNumber}", annotation.boundingBoxNumber);
+
+      // Append the custom comment and other fixed information
+      commentsText += `${customComment} (ref. ${annotation.region},${annotation.y}line ref. ${annotation.firstWord}...${annotation.lastWord} )\n`;
     });
+
+    // This is just to demonstrate the generated text in this example
+    alert(commentsText);
 
     var blob = new Blob([commentsText], { type: "text/plain;charset=utf-8" });
     var link = document.createElement("a");
@@ -762,6 +776,14 @@ canvas.addEventListener("click", function (event) {
 // });
 
 // Button Events
+function toggleTemplateInput() {
+  const container = document.getElementById("templateContainer");
+  if (container.style.display === "none") {
+    container.style.display = "block";
+  } else {
+    container.style.display = "none";
+  }
+}
 
 document.getElementById("fileUpload").addEventListener("change", () => {
   clearAnnotations();
