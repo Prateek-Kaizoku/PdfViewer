@@ -537,7 +537,7 @@ function generateComments() {
         .replace("{boundingBoxNumber}", annotation.boundingBoxNumber);
 
       // Append the custom comment and other fixed information
-      commentsText += `${customComment} (ref. ${annotation.region},${annotation.y}line ref. ${annotation.firstWord}...${annotation.lastWord} )\n`;
+      commentsText += `${customComment} (ref. ${annotation.region} ${annotation.firstWord}...${annotation.lastWord} )\n`;
     });
 
     // This is just to demonstrate the generated text in this example
