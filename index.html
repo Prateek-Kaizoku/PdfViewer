@@ -17,15 +17,7 @@
   <body class="bodyTag">
     <div class="top-bar">
 
-      <button class="btn" id="prev-page">
-        <i class="fas fa-arrow-circle-left"></i> Prev Page
-      </button>
-      <span class="page-info">
-        <span id="page-num"></span> of <span id="page-count"></span>
-      </span>
-      <button class="btn" id="next-page">
-        <i class="fas fa-arrow-circle-right"></i> Next Page
-      </button>
+      
       <button class="btn" id="generate-comments">Generate Comments</button>
       <label for="fileUpload" class="btn custom-file-upload" id="uploadButton">
         Open PDF Document
@@ -52,7 +44,20 @@
     <div id="pdf-container" onclick="addAnnotation(event)">
       <canvas id="pdf-render"></canvas>
       <canvas id="bounding-box-canvas"></canvas>
+      
     </div>
+    <div id="button-container" class="button-container">
+      <button class="btn" id="prev-page">
+        <i class="fas fa-arrow-circle-left"></i> Prev Page
+      </button>
+      <span class="page-info">
+        <span id="page-num"></span> of <span id="page-count"></span>
+      </span>
+      <button class="btn" id="next-page">
+        <i class="fas fa-arrow-circle-right"></i> Next Page
+      </button>
+      </div>
+
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script src="js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>

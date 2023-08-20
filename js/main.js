@@ -487,6 +487,10 @@ function checkAnnotationsInBoundingBox() {
   });
 }
 function generateComments() {
+  if (Object.keys(annotations).length === 0) {
+    alert("No annotations added!");
+    return;
+  }
   pdfDoc.getMetadata().then((metadata) => {
     let title = metadata.info.Title;
 
