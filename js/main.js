@@ -724,7 +724,7 @@ document.getElementById("fileUpload").addEventListener("change", () => {
       if (areYouSure) {
         clearSavedProgress();
       } else {
-        return; // Exit without doing anything further
+        console.log("bolo pencil"); // Exit without doing anything further
       }
     }
 
