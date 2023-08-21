@@ -710,21 +710,25 @@ document.getElementById("fileUpload").addEventListener("change", () => {
   const file = fileInput.files[0];
 
   if (file) {
-    // Check if the user wants to continue from the last saved progress or upload a new file
-    const continueFromLastProgress = window.confirm(
-      "Do you want to continue from the last saved progress or do you want to upload a new file? Click 'OK' to continue from last progress or 'Cancel' to upload a new file."
-    );
+    const savedProgressExists = localStorage.getItem("savedProgress"); // Check for saved progress in local storage
 
-    if (continueFromLastProgress) {
-      console.log("pass"); // Exit without doing anything further
-    } else {
-      const areYouSure = window.confirm(
-        "Are you sure? Your last progress made to the file will be lost."
+    if (savedProgressExists) {
+      // Only show this confirmation if saved progress exists
+      const continueFromLastProgress = window.confirm(
+        "Do you want to continue from the last saved progress or do you want to upload a new file? Click 'OK' to continue from last progress or 'Cancel' to upload a new file."
       );
-      if (areYouSure) {
-        clearSavedProgress();
+
+      if (continueFromLastProgress) {
+        console.log("pass"); // Exit without doing anything further
       } else {
-        console.log("bolo pencil"); // Exit without doing anything further
+        const areYouSure = window.confirm(
+          "Are you sure? Your last progress made to the file will be lost."
+        );
+        if (areYouSure) {
+          clearSavedProgress();
+        } else {
+          console.log("bolo pencil"); // Exit without doing anything further
+        }
       }
     }
 
