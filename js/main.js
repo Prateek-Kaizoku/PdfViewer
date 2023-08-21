@@ -1,4 +1,5 @@
 const url = "../docs/npdf.pdf";
+let newAnnotations = {};
 let uploadedPdfBuffer = null;
 let scannedPages = [];
 let dialogOpen = false;
@@ -16,17 +17,22 @@ const scale = 1.5,
 // Render the page
 const renderPage = (num) => {
   pageIsRendering = true;
-  // hide previous annotations
+
+  // Hide previous annotations
   Object.values(annotations).forEach((pageAnnotations) => {
     pageAnnotations.forEach((annotation) => {
-      annotation.element.style.display = "none";
+      if (annotation.element) {
+        annotation.element.style.display = "none";
+      }
     });
   });
 
-  // Show annotations for current page
+  // Show annotations for the current page
   if (annotations[num]) {
     annotations[num].forEach((annotation) => {
-      annotation.element.style.display = "block";
+      if (annotation.element) {
+        annotation.element.style.display = "block";
+      }
     });
   }
 
@@ -73,6 +79,7 @@ const showPrevPage = () => {
   pageNum--;
   handleTessButtonClick();
   queueRenderPage(pageNum);
+  loadProgress();
 };
 
 // Show Next Page
@@ -83,6 +90,7 @@ const showNextPage = () => {
   pageNum++;
   handleTessButtonClick();
   queueRenderPage(pageNum);
+  loadProgress();
   const button = document.getElementById("next-page"); //make sure it is the right button!!!
 
   if (scannedPages.includes(pageNum)) {
@@ -204,56 +212,119 @@ function addAnnotation(event) {
     const region = getRegion(x, y);
     const headingText = headingTextarea.value;
     const commentText = commentTextarea.value;
-    const annotationText = `Heading: ${headingTextarea.value}\nComment: ${commentTextarea.value}`;
+
     if (headingText && commentText) {
-      var star = document.createElement("div");
-      star.className = "star";
-      star.innerHTML = "&#9733;"; // Unicode star character
+      const star = createStarElement(x, y);
+      const annotation = createAnnotationElement(headingText, commentText);
 
-      // Create annotation element (hidden by default)
-      var annotation = document.createElement("div");
-      annotation.className = "annotation";
-      annotation.textContent = annotationText;
-      annotation.style.display = "none";
+      attachAnnotationToStar(star, annotation);
 
-      // Positioning
-      x -= 10; // Centering adjustment
-      y -= 10;
-      star.style.left = x + "px";
-      star.style.top = y + "px";
       document.getElementById("pdf-container").appendChild(star);
-      star.appendChild(annotation);
-
-      // Show annotation on hover
-      star.addEventListener("mouseover", function () {
-        annotation.style.display = "block";
-      });
-      star.addEventListener("mouseout", function () {
-        annotation.style.display = "none";
-      });
-
-      // Store the annotation for the current page
-      if (!annotations[pageNum]) {
-        annotations[pageNum] = [];
-      }
-      annotations[pageNum].push({
-        heading: headingText,
-        comment: commentText,
-        element: star,
-        x: x,
-        y: y,
-        region: region,
-      });
+      storeAnnotationForPage(
+        pageNum,
+        headingText,
+        commentText,
+        star,
+        x,
+        y,
+        region
+      );
+      addAnnotationToMemory(pageNum, annotation);
       checkAnnotationsInBoundingBox();
     }
-    // Remove dialog box
 
+    // Save the progress
+    saveProgress();
+    // Remove dialog box
     // Wait for the transition to complete before actually removing the dialog
     removeDialog(dialog);
   });
 
   cancelButton.addEventListener("click", function () {
     removeDialog(dialog);
+  });
+}
+
+function addAnnotationToMemory(pageNum, annotation) {
+  if (!newAnnotations[pageNum]) {
+    newAnnotations[pageNum] = [];
+  }
+  newAnnotations[pageNum].push(annotation);
+}
+
+//additional functions
+function createStarElement(x, y, annotationText) {
+  const star = document.createElement("div");
+  star.className = "star";
+  star.innerHTML = "&#9733;"; // Unicode star character
+
+  const annotation = document.createElement("div");
+
+  annotation.className = "annotation";
+  annotation.textContent = annotationText;
+  annotation.style.display = "none";
+
+  // Centering adjustment
+  x -= 10;
+  y -= 10;
+
+  star.style.left = x + "px";
+  star.style.top = y + "px";
+
+  // Show annotation on hover
+  star.addEventListener("mouseover", function () {
+    annotation.style.display = "block";
+  });
+  star.addEventListener("mouseout", function () {
+    annotation.style.display = "none";
+  });
+
+  star.appendChild(annotation);
+  return star;
+}
+
+function createAnnotationElement(headingText, commentText) {
+  const annotationText = `Heading: ${headingText}\nComment: ${commentText}`;
+  const annotation = document.createElement("div");
+  annotation.className = "annotation";
+  annotation.textContent = annotationText;
+  annotation.style.display = "none";
+
+  return annotation;
+}
+
+function attachAnnotationToStar(star, annotation) {
+  star.appendChild(annotation);
+
+  // Show annotation on hover
+  star.addEventListener("mouseover", function () {
+    annotation.style.display = "block";
+  });
+  star.addEventListener("mouseout", function () {
+    annotation.style.display = "none";
+  });
+}
+
+function storeAnnotationForPage(
+  pageNum,
+  headingText,
+  commentText,
+  star,
+  x,
+  y,
+  region
+) {
+  if (!annotations[pageNum]) {
+    annotations[pageNum] = [];
+  }
+  annotations[pageNum].push({
+    heading: headingText,
+    comment: commentText,
+    element: star,
+    x: x,
+    y: y,
+    region: region,
+    pageNum: pageNum,
   });
 }
 
@@ -276,172 +347,15 @@ function clearAnnotations() {
   scannedPages = [];
 }
 
-// function addAnnotation(event) {
-//   if (dialogOpen) return;
-//   const rect = canvas.getBoundingClientRect();
-
-//   let x = event.clientX - rect.left;
-//   let y = event.clientY - rect.top;
-
-//   if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) {
-//     alert("Please add annotations within the bounds of the page.");
-//     return; // Exit the function if the click is out of bounds
-//   }
-
-//   // Create dialog box
-//   const dialog = document.createElement("div");
-//   dialog.className = "annotation-dialog";
-//   const headingLabel = document.createElement("label");
-//   headingLabel.textContent = "Headings: ";
-//   const headingTextarea = document.createElement("textarea");
-//   headingLabel.appendChild(headingTextarea);
-//   dialog.appendChild(headingLabel);
-//   dialogOpen = true;
-//   // Create comment input field
-//   const commentLabel = document.createElement("label");
-//   commentLabel.textContent = "Comments: ";
-//   const commentTextarea = document.createElement("textarea");
-//   commentLabel.appendChild(commentTextarea);
-//   dialog.appendChild(commentLabel);
-//   let isDragging = false;
-//   let offsetX, offsetY;
-
-//   dialog.addEventListener("mousedown", function (event) {
-//     isDragging = true;
-//     offsetX =
-//       event.pageX - dialog.getBoundingClientRect().left - window.scrollX;
-//     offsetY = event.pageY - dialog.getBoundingClientRect().top - window.scrollY;
-//     document.addEventListener("mousemove", onMouseMove);
-//     document.addEventListener("mouseup", onMouseUp);
-//   });
-
-//   function onMouseMove(e) {
-//     if (isDragging) {
-//       const dialogHeight = dialog.offsetHeight;
-//       dialog.style.left = e.clientX - offsetX + "px";
-//       dialog.style.top = e.clientY - offsetY - dialogHeight + "px";
-//       dialog.style.transform = "none"; // Remove the centering transform
-//     }
-//   }
-
-//   function onMouseUp() {
-//     isDragging = false;
-//     document.removeEventListener("mousemove", onMouseMove);
-//     document.removeEventListener("mouseup", onMouseUp);
-//   }
-//   const submitButton = document.createElement("button");
-//   submitButton.textContent = "Submit";
-//   const cancelButton = document.createElement("button");
-//   cancelButton.textContent = "Cancel";
-
-//   dialog.appendChild(submitButton);
-//   dialog.appendChild(cancelButton);
-//   document.body.appendChild(dialog);
-//   requestAnimationFrame(function () {
-//     dialog.classList.add("visible"); // Add "visible" class
-//   });
-
-// submitButton.addEventListener("click", function () {
-//   const region = getRegion(x, y);
-//   const headingText = headingTextarea.value;
-//   const commentText = commentTextarea.value;
-//   const annotationText = `Heading: ${headingTextarea.value}\nComment: ${commentTextarea.value}`;
-//   if (headingText && commentText) {
-//     var star = document.createElement("div");
-//     star.className = "star";
-//     star.innerHTML = "&#9733;"; // Unicode star character
-
-//     // Create annotation element (hidden by default)
-//     var annotation = document.createElement("div");
-//     annotation.className = "annotation";
-//     annotation.textContent = annotationText;
-//     annotation.style.display = "none";
-
-//     // Positioning
-//     x -= 10; // Centering adjustment
-//     y -= 10;
-//     star.style.left = x + "px";
-//     star.style.top = y + "px";
-//     document.getElementById("pdf-container").appendChild(star);
-//     star.appendChild(annotation);
-
-//     // Show annotation on hover
-//     star.addEventListener("mouseover", function () {
-//       annotation.style.display = "block";
-//     });
-//     star.addEventListener("mouseout", function () {
-//       annotation.style.display = "none";
-//     });
-
-//     // Store the annotation for the current page
-//     if (!annotations[pageNum]) {
-//       annotations[pageNum] = [];
-//     }
-//     annotations[pageNum].push({
-//       heading: headingText,
-//       comment: commentText,
-//       element: star,
-//       x: x,
-//       y: y,
-//       region: region,
-//     });
-//     checkAnnotationsInBoundingBox();
-//   }
-//   // Remove dialog box
-//   removeDialog(dialog);
-// });
-
-//   cancelButton.addEventListener("click", function () {
-//     // Remove dialog box without saving
-//     dialog.classList.remove("visible");
-
-//     // Wait for the transition to complete before actually removing the dialog
-//     dialog.addEventListener(
-//       "transitionend",
-//       function () {
-//         document.body.removeChild(dialog);
-//         dialogOpen = false;
-//       },
-//       { once: true }
-//     );
-//   });
-// }
-
-// check if the annotation is in the bounding box.
-
-// function checkAnnotationsInBoundingBox() {
-//   const offsetX = 1.5; // Horizontal offset
-//   const offsetY = 7.5; // Vertical offset
-
-//   Object.values(annotations).forEach((pageAnnotations) => {
-//     pageAnnotations.forEach((annotation) => {
-//       const x = annotation.x;
-//       const y = annotation.y;
-//       let insideBoundingBox = false;
-//       let box;
-//       for (let i = 0; i < boundingBoxes.length; i++) {
-//         box = boundingBoxes[i];
-//         if (
-//           x >= box.x0 + offsetX &&
-//           x <= box.x1 - offsetX &&
-//           y > box.y0 - offsetY &&
-//           y <= box.y1 - offsetY
-//         ) {
-//           insideBoundingBox = true;
-//           console.log(
-//             `Annotation at (${x}, ${y}) is inside bounding box number ${box.number} with offset.`
-//           );
-//           break; // Exit the loop if a bounding box is found
-//         } else {
-//           console.log(x, y, box.x0, box.x1, box.y0, box.y1);
-//           console.log(
-//             `Annotation at (${x}, ${y}) is not inside any bounding box, boxnumber ${box.number} with offset.`
-//           );
-//         }
-//       }
-//     });
-//   });
-// }
+function hideAllAnnotations() {
+  Object.values(annotations).forEach((pageAnnotations) => {
+    pageAnnotations.forEach((annotation) => {
+      if (annotation.element) {
+        annotation.element.style.display = "none";
+      }
+    });
+  });
+}
 
 function checkAnnotationsInBoundingBox() {
   const offsetX = 1.5; // Horizontal offset
@@ -486,6 +400,7 @@ function checkAnnotationsInBoundingBox() {
     });
   });
 }
+
 function generateComments() {
   if (Object.keys(annotations).length === 0) {
     alert("No annotations added!");
@@ -597,36 +512,6 @@ async function stichToPdf() {
   link.click();
 }
 
-// function generateComments() {
-//   pdfDoc.getMetadata().then((metadata) => {
-//     let title = metadata.info.Title;
-
-//     // Replace any characters that are not suitable for a filename
-//     title = title.replace(/[^a-zA-Z0-9 \-_]+/g, "");
-
-//     // Concatenate the date to the title
-//     const date = new Date();
-//     const formattedDate = `${date.getFullYear()}-${
-//       date.getMonth() + 1
-//     }-${date.getDate()}`;
-//     const filename = `${title}_${formattedDate}.txt`;
-
-//     var commentsText = "";
-//     Object.keys(annotations).forEach((page) => {
-//       commentsText += `Page ${page}:\n`;
-//       annotations[page].forEach((annotation) => {
-//         // Include the bounding box number with each comment
-//         l      });
-//     });
-
-//     var blob = new Blob([commentsText], { type: "text/plain;charset=utf-8" });
-//     var link = document.createElement("a");
-//     link.href = URL.createObjectURL(blob);
-//     link.download = filename;
-//     link.click();
-//   });
-// }
-
 function handleFileUpload(event) {
   const file = event.target.files[0];
   if (file) {
@@ -726,15 +611,15 @@ canvas.addEventListener("mousemove", function (event) {
 // Get the region name based on the x and y coordinates 1left, 2right, 3left, 4right...
 
 function getRegion(x, y) {
-  const numRows = 4;
+  const numRows = 1;
   const numCols = 2;
   const rowHeight = canvas.height / numRows;
   const colWidth = canvas.width / numCols;
 
   const rowNumber = Math.floor(y / rowHeight) + 1; // Row number starts from 1
-  const colLetter = x < colWidth ? "L" : "R"; // Left if x < colWidth, right otherwise
+  const colLetter = x < colWidth ? "Left" : "Right"; // Left if x < colWidth, right otherwise
 
-  return `${rowNumber}${colLetter}`;
+  return `${colLetter}`;
 }
 
 // Example usage
@@ -748,38 +633,6 @@ canvas.addEventListener("click", function (event) {
   console.log(`Clicked region: ${region}`); // Will print the region name
 });
 
-// document.getElementById("uploadButton").addEventListener("change", () => {
-//   const fileInput = document.getElementById("fileUpload");
-//   const file = fileInput.files[0];
-
-//   if (file) {
-//     const reader = new FileReader();
-
-//     reader.onload = function (e) {
-//       const newUrl = e.target.result;
-
-//       // Update the PDF document with the new URL
-//       pdfjsLib
-//         .getDocument(newUrl)
-//         .promise.then((pdfDoc_) => {
-//           pdfDoc = pdfDoc_;
-//           document.querySelector("#page-count").textContent = pdfDoc.numPages;
-
-//           // Reset annotations and page number
-//           annotations = {};
-//           pageNum = 1;
-//           renderPage(pageNum);
-//         })
-//         .catch((err) => console.error(err));
-//     };
-
-//     reader.readAsDataURL(file);
-//   } else {
-//     alert("Please select a PDF file to upload.");
-//   }
-// });
-
-// Button Events
 function toggleTemplateInput() {
   const container = document.getElementById("templateContainer");
   if (container.style.display === "none") {
@@ -789,12 +642,92 @@ function toggleTemplateInput() {
   }
 }
 
+// local storage code
+function saveProgress() {
+  // Deep copy annotations and remove DOM elements before saving to local storage
+  const annotationsCopy = JSON.parse(JSON.stringify(annotations));
+  for (let page in annotationsCopy) {
+    annotationsCopy[page] = annotationsCopy[page].map((annotation) => {
+      const { element, ...rest } = annotation;
+      return rest;
+    });
+  }
+
+  localStorage.setItem(
+    "pdfAnnotationsProgress",
+    JSON.stringify(annotationsCopy)
+  );
+}
+
+function clearAnnotationsFromPage() {
+  const container = document.getElementById("pdf-container");
+  const existingAnnotations = container.getElementsByClassName("star");
+  while (existingAnnotations.length > 0) {
+    container.removeChild(existingAnnotations[0]);
+  }
+}
+
+function renderStoredAnnotations(annotationsForPage) {
+  clearAnnotationsFromPage();
+  annotationsForPage.forEach((annotation) => {
+    const star = createStarElement(
+      annotation.x,
+      annotation.y,
+      `Heading: ${annotation.heading}\nComment: ${annotation.comment}`
+    );
+    console.log(annotationsForPage);
+    document.getElementById("pdf-container").appendChild(star);
+    annotation.element = star;
+  });
+}
+function loadProgress() {
+  const savedProgress = localStorage.getItem("pdfAnnotationsProgress");
+  if (savedProgress) {
+    annotations = JSON.parse(savedProgress);
+    if (annotations[pageNum]) {
+      renderStoredAnnotations(annotations[pageNum]);
+    }
+  }
+}
+
+function clearSavedProgress() {
+  localStorage.removeItem("pdfAnnotationsProgress");
+}
+
+function recreateDOMElementForAnnotation(annotation) {
+  const star = createStarElement(
+    annotation.x,
+    annotation.y,
+    `Heading: ${annotation.heading}\nComment: ${annotation.comment}`
+  );
+  document.getElementById("pdf-container").appendChild(star);
+  return star;
+}
+
 document.getElementById("fileUpload").addEventListener("change", () => {
   clearAnnotations();
   const fileInput = document.getElementById("fileUpload");
   const file = fileInput.files[0];
 
   if (file) {
+    // Check if the user wants to continue from the last saved progress or upload a new file
+    const continueFromLastProgress = window.confirm(
+      "Do you want to continue from the last saved progress or do you want to upload a new file? Click 'OK' to continue from last progress or 'Cancel' to upload a new file."
+    );
+
+    if (continueFromLastProgress) {
+      console.log("pass"); // Exit without doing anything further
+    } else {
+      const areYouSure = window.confirm(
+        "Are you sure? Your last progress made to the file will be lost."
+      );
+      if (areYouSure) {
+        clearSavedProgress();
+      } else {
+        return; // Exit without doing anything further
+      }
+    }
+
     const reader = new FileReader();
 
     reader.onload = function (e) {
@@ -811,6 +744,8 @@ document.getElementById("fileUpload").addEventListener("change", () => {
           annotations = {};
           pageNum = 1;
           renderPage(pageNum);
+          // Optionally, you could also call `loadProgress()` here if needed
+          loadProgress();
           handleTessButtonClick();
         })
         .catch((err) => console.error(err));
@@ -827,6 +762,10 @@ document.querySelector("#next-page").addEventListener("click", showNextPage);
 document
   .querySelector("#generate-comments")
   .addEventListener("click", generateComments);
+
+document
+  .querySelector("#save-progress")
+  .addEventListener("click", saveProgress);
 function showDialog() {
   const dialog = document.querySelector(".annotation-dialog");
   dialog.classList.add("visible");
