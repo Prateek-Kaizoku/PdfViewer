@@ -710,7 +710,9 @@ document.getElementById("fileUpload").addEventListener("change", () => {
   const file = fileInput.files[0];
 
   if (file) {
-    const savedProgressExists = localStorage.getItem("savedProgress"); // Check for saved progress in local storage
+    const savedProgressExists =
+      localStorage.getItem("pdfAnnotationsProgress") !== null;
+    // Check for saved progress in local storage
 
     if (savedProgressExists) {
       // Only show this confirmation if saved progress exists
