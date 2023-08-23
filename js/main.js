@@ -278,7 +278,9 @@ function createStarElement(x, y, annotationText) {
   star.addEventListener("mouseout", function () {
     annotation.style.display = "none";
   });
-
+  star.addEventListener("click", function (event) {
+    event.stopPropagation();
+  });
   star.appendChild(annotation);
   return star;
 }
