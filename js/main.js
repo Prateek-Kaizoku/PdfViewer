@@ -694,6 +694,15 @@ function clearSavedProgress() {
   localStorage.removeItem("pdfAnnotationsProgress");
 }
 
+function toggleMenu() {
+  const topBar = document.querySelector(".navbar .top-bar");
+  if (topBar.style.display === "none" || !topBar.style.display) {
+    topBar.style.display = "flex";
+  } else {
+    topBar.style.display = "none";
+  }
+}
+
 function recreateDOMElementForAnnotation(annotation) {
   const star = createStarElement(
     annotation.x,
@@ -769,9 +778,6 @@ document
   .querySelector("#generate-comments")
   .addEventListener("click", generateComments);
 
-document
-  .querySelector("#save-progress")
-  .addEventListener("click", saveProgress);
 function showDialog() {
   const dialog = document.querySelector(".annotation-dialog");
   dialog.classList.add("visible");

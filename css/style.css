@@ -13,6 +13,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   position: relative;
 }
@@ -23,7 +24,11 @@
   padding: 10 rem;
   margin: 1.5rem;
   width: 100%;
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
 
 }
 .custom-file-upload {
@@ -47,7 +52,8 @@
   border: none;
   outline: none;
   cursor: pointer;
-  padding: 0.7rem 2rem;
+  padding: 1rem 1rem;
+  margin: 1rem 0;
   font-size: large;
   border-radius: var(--button-radius);
   display: inline-block;
@@ -73,9 +79,6 @@
 #pdf-container {
   position: relative;
   width: 100%;
-  display: block;
-  flex-direction: row;
-  align-items: center;
   margin-top: 5%;
 }
 
@@ -178,27 +181,69 @@
   align-items: center;
 
 }
+.hamburger {
+  font-size: 50px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.723);
+  cursor: pointer;
+  display: none;  /* Initially hidden */
+  position: relative; /* Added for absolute positioning */
+ margin-right: 10px;
+}
+.webpage-title {
+  display: block; /* Make it visible by default */
+  color: white; /* You can adjust the color as needed */
+  font-weight: bold;
+}
 
 
+.navbar {
+  display: flex;
+  justify-content: center; /* Center the title on larger screens */
+  flex-direction: column;
+  align-items: center;
+  background-color: #333;
+  padding: 15px 0;
+  position: relative; /* Added for absolute positioning of the hamburger */
+}
 
 
 
 @media screen and (max-width: 600px) and (orientation: portrait) {
   .btn {
-    margin: 0.5rem 0.5rem;
-    border-radius: 10px;
-    min-width: 100px;
-    padding: 5px 10px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0.7rem 2rem;
+    font-size: small;
+    border-radius: var(--button-radius);
+    display: inline-block;
+    transition: opacity var(--transition-speed); /* smooth transition */
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
   }
-
+  .webpage-title {
+    display: inline;/* Show the title next to the hamburger on smaller screens */
+    
+}
   .annotation-dialog {
     width: 90%;
   }
+  .navbar {
+    justify-content: flex;
+    flex-direction: row;
+    justify-content: flex-start; /* Align to the start on smaller screens */
+    padding-left: 1px; /* Some padding to prevent the hamburger from sticking to the edge */
+}
   .top-bar {
     background: #333;
     color: #fff;
-    padding: 1rem;
     width: 100%; 
+    display: none;
+    flex-direction: column;
    }
 
   #pdf-container {
@@ -206,6 +251,88 @@
     width: 100%;
     display: block;
   }
+  .hamburger {
+    display: block;
+    position: relative;
+    margin-right: 10px;
+}
+.navbar .top-bar.active {
+    display: block;
+}
+#button-container {
+  background: #333;
+  color: #fff;
+  padding: 1 rem;
+  margin: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+}
+}
+@media screen and (max-width: 600px) and (orientation: landscape) {
+  .btn {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0.7rem 2rem;
+    font-size: small;
+    border-radius: var(--button-radius);
+    display: inline-block;
+    transition: opacity var(--transition-speed); /* smooth transition */
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+  }
+  .webpage-title {
+    display: inline;/* Show the title next to the hamburger on smaller screens */
+    
+}
+  .annotation-dialog {
+    width: 90%;
+  }
+  .navbar {
+    justify-content: flex;
+    flex-direction: row;
+    justify-content: flex-start; /* Align to the start on smaller screens */
+    padding-left: 1px; /* Some padding to prevent the hamburger from sticking to the edge */
+}
+  .top-bar {
+    background: #333;
+    color: #fff;
+    width: 100%; 
+    display: none;
+    flex-direction: column;
+   }
+
+  #pdf-container {
+    position: relative;
+    width: 100%;
+    display: block;
+  }
+  .hamburger {
+    display: block;
+    position: relative;
+    margin-right: 10px;
+}
+.navbar .top-bar.active {
+    display: block;
+}
+#button-container {
+  background: #333;
+  color: #fff;
+  padding: 1 rem;
+  margin: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+}
 }
 @media screen and (max-width: 767px) and (orientation: landscape) {
   .btn {
@@ -224,8 +351,8 @@
     color: #fff;
     padding: 1rem;
     width: 100%;
-    display: flex;
-    flex-direction: row;
+    display: none;
+    flex-direction: column;
     justify-content: space-between;
   }
   #pdf-container {
@@ -233,6 +360,39 @@
     width: 100%;
     display: block;
   }
+  .navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;/* Align to the start on smaller screens */
+    padding-left: 15px; /* Some padding to prevent the hamburger from sticking to the edge */
 }
+.hamburger {
+  display: block;
+  position: relative;
+  margin-right: 10px;
+  padding: 10px;
+}
+.navbar .top-bar.active {
+  display: block;
+}
+.webpage-title {
+  display: block; /* Show the title next to the hamburger on smaller screens */
+}
+
+#button-container {
+  background: #333;
+  color: #fff;
+  padding: 1 rem;
+  margin: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+}
+  
+}
+
 
 
