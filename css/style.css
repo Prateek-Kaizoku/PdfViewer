@@ -351,8 +351,8 @@
     color: #fff;
     padding: 1rem;
     width: 100%;
-    display: block;
-    flex-direction: row;
+    display: none;
+    flex-direction: column;
     justify-content: space-between;
   }
   #pdf-container {
@@ -373,7 +373,7 @@
   padding: 10px;
 }
 .navbar .top-bar.active {
-  display: flex;
+  display: block;
 }
 .webpage-title {
   display: block; /* Show the title next to the hamburger on smaller screens */
