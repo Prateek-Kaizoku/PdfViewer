@@ -334,7 +334,7 @@
 
 }
 }
-@media screen and (max-width: 767px) and (orientation: landscape) {
+@media screen and (max-width: 896px) and (orientation: landscape) {
   .btn {
     padding: 0.5rem 0.5rem;
     margin: 0.5rem 0.5rem;
@@ -351,7 +351,7 @@
     color: #fff;
     padding: 1rem;
     width: 100%;
-    display: block;
+    display: none;
     flex-direction: column;
     justify-content: space-between;
   }
@@ -362,19 +362,20 @@
   }
   .navbar {
     display: flex;
+    justify-content: center;
     flex-direction: row;
-    justify-content: flex-start;/* Align to the start on smaller screens */
-    padding-left: 15px; /* Some padding to prevent the hamburger from sticking to the edge */
+    align-items: center;
+    background-color: #333;
+    padding: 15px 0;
+    position: relative;
 }
 .hamburger {
   display: block;
   position: relative;
-  margin-right: 10px;
+  margin-right: 10%;
   padding: 10px;
 }
-.navbar .top-bar.active {
-  display: block;
-}
+
 .webpage-title {
   display: block; /* Show the title next to the hamburger on smaller screens */
 }
