@@ -193,8 +193,9 @@
 }
 .webpage-title {
   display: block; /* Make it visible by default */
-  color: white; /* You can adjust the color as needed */
+  color: rgba(255, 255, 255, 0.694); /* You can adjust the color as needed */
   font-weight: bold;
+  font-size: 30px;
 }
 
 
@@ -289,6 +290,7 @@
   }
   .webpage-title {
     display: inline;/* Show the title next to the hamburger on smaller screens */
+    font-size: 20px;
     
 }
   .annotation-dialog {
@@ -378,6 +380,7 @@
 
 .webpage-title {
   display: block; /* Show the title next to the hamburger on smaller screens */
+  font-size: 20px;
 }
 
 #button-container {
