@@ -238,6 +238,7 @@ function addAnnotation(event) {
     // Remove dialog box
     // Wait for the transition to complete before actually removing the dialog
     removeDialog(dialog);
+    document.getElementById("generate-comments").disabled = false;
   });
 
   cancelButton.addEventListener("click", function () {
@@ -523,6 +524,7 @@ function handleFileUpload(event) {
     };
     reader.readAsArrayBuffer(file);
   }
+  document.getElementById("pdf-stitch").disabled = false;
 }
 
 async function handleTessButtonClick() {
@@ -688,6 +690,7 @@ function loadProgress() {
     annotations = JSON.parse(savedProgress);
     if (annotations[pageNum]) {
       renderStoredAnnotations(annotations[pageNum]);
+      document.getElementById("generate-comments").disabled = false;
     }
   }
 }

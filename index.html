@@ -20,7 +20,6 @@
       <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
       <span class="webpage-title">PDF Viewer and Comment Generator</span>
       <div class="top-bar">
-        <button class="btn" id="generate-comments">Generate Comments</button>
         <label
           for="fileUpload"
           class="btn custom-file-upload"
@@ -28,6 +27,11 @@
         >
           Open PDF Document
         </label>
+
+        <button class="btn" id="generate-comments" disabled>
+          Generate Comments
+        </button>
+
         <input
           type="file"
           id="fileUpload"
@@ -36,7 +40,7 @@
           onchange="handleFileUpload(event)"
         />
 
-        <button id="pdf-stitch" class="btn" onclick="stichToPdf()">
+        <button id="pdf-stitch" class="btn" onclick="stichToPdf()" disabled>
           <i class="fas fa-arrow-circle-left"></i> Stitch to PDF
         </button>
         <button class="btn" onclick="toggleTemplateInput()">
