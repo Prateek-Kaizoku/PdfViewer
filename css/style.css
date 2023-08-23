@@ -351,7 +351,7 @@
     color: #fff;
     padding: 1rem;
     width: 100%;
-    display: none;
+    display: block;
     flex-direction: column;
     justify-content: space-between;
   }
