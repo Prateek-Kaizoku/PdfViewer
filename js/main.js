@@ -726,16 +726,15 @@ document.getElementById("fileUpload").addEventListener("change", () => {
   if (file) {
     const savedProgressExists =
       localStorage.getItem("pdfAnnotationsProgress") !== null;
-    // Check for saved progress in local storage
 
     if (savedProgressExists) {
-      // Only show this confirmation if saved progress exists
       const continueFromLastProgress = window.confirm(
         "Do you want to continue from the last saved progress or do you want to upload a new file? Click 'OK' to continue from last progress or 'Cancel' to upload a new file."
       );
 
       if (continueFromLastProgress) {
-        console.log("pass"); // Exit without doing anything further
+        console.log("pass");
+        return;
       } else {
         const areYouSure = window.confirm(
           "Are you sure? Your last progress made to the file will be lost."
@@ -743,7 +742,8 @@ document.getElementById("fileUpload").addEventListener("change", () => {
         if (areYouSure) {
           clearSavedProgress();
         } else {
-          console.log("bolo pencil"); // Exit without doing anything further
+          console.log("bolo pencil");
+          return;
         }
       }
     }
@@ -753,22 +753,77 @@ document.getElementById("fileUpload").addEventListener("change", () => {
     reader.onload = function (e) {
       const newUrl = e.target.result;
 
-      // Update the PDF document with the new URL
       pdfjsLib
         .getDocument(newUrl)
         .promise.then((pdfDoc_) => {
           pdfDoc = pdfDoc_;
           document.querySelector("#page-count").textContent = pdfDoc.numPages;
 
-          // Reset annotations and page number
           annotations = {};
           pageNum = 1;
           renderPage(pageNum);
-          // Optionally, you could also call `loadProgress()` here if needed
+
           loadProgress();
           handleTessButtonClick();
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          if (err.name === "PasswordException") {
+            const password = prompt(
+              "This document is password protected. Enter the password:"
+            );
+            if (password) {
+              pdfjsLib
+                .getDocument({ url: newUrl, password: password })
+                .promise.then((pdfDoc_) => {
+                  pdfDoc = pdfDoc_;
+                  document.querySelector("#page-count").textContent =
+                    pdfDoc.numPages;
+
+                  annotations = {};
+                  pageNum = 1;
+                  renderPage(pageNum);
+
+                  loadProgress();
+                  handleTessButtonClick();
+                })
+                .catch((innerErr) => {
+                  if (innerErr.name === "PasswordException") {
+                    const retry = confirm(
+                      "Wrong password. Would you like to try again?"
+                    );
+                    if (retry) {
+                      const newPassword = prompt("Re-enter the password:");
+                      if (newPassword) {
+                        pdfjsLib
+                          .getDocument({ url: newUrl, password: newPassword })
+                          .promise.then((pdfDoc_) => {
+                            // ... (handle the PDF as before)
+                          })
+                          .catch((retryErr) => {
+                            console.error(retryErr);
+                            alert(
+                              "Failed to open the document with the provided password."
+                            );
+                          });
+                      } else {
+                        alert(
+                          "No password provided. Unable to open the document."
+                        );
+                      }
+                    } else {
+                      alert("Operation cancelled.");
+                    }
+                  } else {
+                    console.error(innerErr);
+                  }
+                });
+            } else {
+              alert("No password provided. Unable to open the document.");
+            }
+          } else {
+            console.error(err);
+          }
+        });
     };
 
     reader.readAsDataURL(file);
