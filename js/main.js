@@ -488,8 +488,34 @@ async function stichToPdf() {
     }
     return a.page - b.page;
   });
+  let decryptedPdfBuffer;
 
-  const pdfDoc1 = await PDFLib.PDFDocument.load(uploadedPdfBuffer);
+  // Attempt to decrypt the PDF if it's password-protected
+  try {
+    const pdfDoc = await pdfjsLib.getDocument({ data: uploadedPdfBuffer })
+      .promise;
+    decryptedPdfBuffer = await pdfDoc.getData();
+  } catch (err) {
+    if (err.name === "PasswordException") {
+      const password = prompt(
+        "This document is password protected. Enter the password:"
+      );
+      if (!password) {
+        alert("No password provided. Unable to proceed.");
+        return;
+      }
+      const pdfDoc = await pdfjsLib.getDocument({
+        data: uploadedPdfBuffer,
+        password: password,
+      }).promise;
+      decryptedPdfBuffer = await pdfDoc.getData();
+    } else {
+      console.error("Failed to load or decrypt PDF:", err);
+      return;
+    }
+  }
+
+  const pdfDoc1 = await PDFLib.PDFDocument.load(decryptedPdfBuffer);
   const [pageWidth, pageHeight] = [600, 800];
   const newPage = pdfDoc1.addPage([pageWidth, pageHeight]);
   let x = 50;
@@ -731,10 +757,8 @@ document.getElementById("fileUpload").addEventListener("change", () => {
       const continueFromLastProgress = window.confirm(
         "Do you want to continue from the last saved progress or do you want to upload a new file? Click 'OK' to continue from last progress or 'Cancel' to upload a new file."
       );
-
       if (continueFromLastProgress) {
         console.log("pass");
-        return;
       } else {
         const areYouSure = window.confirm(
           "Are you sure? Your last progress made to the file will be lost."
