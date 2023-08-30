@@ -454,9 +454,9 @@ function generateComments() {
 
       // Embed variables into user template
       let customComment = userTemplate
-        .replace("{heading}", annotation.heading)
+        .replace("{Topic}", annotation.heading)
         .replace("{comment}", annotation.comment)
-        .replace("{boundingBoxNumber}", annotation.boundingBoxNumber);
+        .replace("{LineNumber}", annotation.boundingBoxNumber);
 
       // Append the custom comment and other fixed information
       commentsText += `${customComment} (ref. ${annotation.region} ${annotation.firstWord}...${annotation.lastWord} )\n`;
