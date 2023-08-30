@@ -1,4 +1,4 @@
-const url = "../docs/npdf.pdf";
+const url = "../docs/embed.pdf";
 let newAnnotations = {};
 let uploadedPdfBuffer = null;
 let scannedPages = [];
