@@ -15,6 +15,7 @@ const pdfContainer = document.getElementById("pdf-container");
 const buttonToggle = document.getElementById("template-toggle");
 const hamburger = document.getElementById("hamburger-toggle");
 const stitchBtn = document.getElementById("pdf-stitch");
+
 const scale = 1.5,
   canvas = document.querySelector("#pdf-render"),
   ctx = canvas.getContext("2d");
