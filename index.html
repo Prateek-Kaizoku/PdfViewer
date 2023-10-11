@@ -17,7 +17,7 @@
 
   <body class="bodyTag">
     <nav class="navbar">
-      <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
+      <button class="hamburger" id="hamburger-toggle">&#9776;</button>
       <span class="webpage-title">PDF Viewer and Comment Generator</span>
       <div class="top-bar">
         <label
@@ -40,12 +40,10 @@
           onchange="handleFileUpload(event)"
         />
 
-        <button id="pdf-stitch" class="btn" onclick="stichToPdf()" disabled>
+        <button id="pdf-stitch" class="btn" disabled>
           <i class="fas fa-arrow-circle-left"></i> Stitch to PDF
         </button>
-        <button class="btn" onclick="toggleTemplateInput()">
-          Change Template
-        </button>
+        <button class="btn" id="template-toggle">Change Template</button>
         <div id="templateContainer" style="display: none">
           <textarea id="templateInput" rows="4" cols="50">
           line {LineNumber}  "{Topic}" "{comment}" .
@@ -55,8 +53,9 @@
       </div>
     </nav>
 
-    <div id="pdf-container" onclick="addAnnotation(event)">
+    <div id="pdf-container">
       <canvas id="pdf-render"></canvas>
+
       <canvas id="bounding-box-canvas"></canvas>
     </div>
     <div id="button-container" class="button-container">
@@ -72,8 +71,11 @@
     </div>
 
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
-    <script src="js/main.js"></script>
+    <script type="module" src="./js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="
+    https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js
+    "></script>
     <script src="https://unpkg.com/pdf-lib@latest/dist/pdf-lib.min.js"></script>
   </body>
 </html>

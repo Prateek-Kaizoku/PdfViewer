@@ -9,7 +9,12 @@ let pdfDoc = null,
   pageIsRendering = false,
   pageNumIsPending = null;
 let annotations = {}; // Store annotations by page number
+const fileUpload = document.getElementById("fileUpload");
 
+const pdfContainer = document.getElementById("pdf-container");
+const buttonToggle = document.getElementById("template-toggle");
+const hamburger = document.getElementById("hamburger-toggle");
+const stitchBtn = document.getElementById("pdf-stitch");
 const scale = 1.5,
   canvas = document.querySelector("#pdf-render"),
   ctx = canvas.getContext("2d");
@@ -567,7 +572,6 @@ async function handleTessButtonClick() {
   try {
     const result = await Tesseract.recognize(canvas, "eng", {
       logger: (m) => {
-        console.log(m);
         if (m.status === "recognizing text") {
           button.style.setProperty("--primary-color", "green"); // or any other style changes you want
           button.textContent = "Processing...";
@@ -611,9 +615,9 @@ async function handleTessButtonClick() {
     });
 
     // If you want to log the extracted paragraphs to the console:
-    lines.forEach((line, index) => {
-      console.log(`Paragraph ${index + 1}:`, line.text);
-    });
+    // lines.forEach((line, index) => {
+    //   console.log(`Paragraph ${index + 1}:`, line.text);
+    // });
     scannedPages.push(pageNum);
     checkAnnotationsInBoundingBox();
   } catch (err) {
@@ -871,3 +875,9 @@ function hideDialog() {
   const dialog = document.querySelector(".annotation-dialog");
   dialog.classList.remove("visible");
 }
+
+pdfContainer.addEventListener("click", addAnnotation);
+buttonToggle.addEventListener("click", toggleTemplateInput);
+hamburger.addEventListener("click", toggleMenu);
+stitchBtn.addEventListener("click", stichToPdf);
+fileUpload.addEventListener("change", handleFileUpload);
