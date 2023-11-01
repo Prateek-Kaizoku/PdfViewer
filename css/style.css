@@ -5,12 +5,20 @@
   --transition-speed: 0.3s;
 }
 
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
 .bodyTag {
   background-color: #333;
   margin-top: 10px;
   padding: 0;
   box-sizing: border-box;
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -80,6 +88,8 @@
   position: relative;
   width: 100%;
   margin-top: 5%;
+  margin-left: 30%;
+  padding: auto;
 }
 
 .star {
@@ -128,12 +138,21 @@
   opacity: 1; /* Set final opacity to 1 when the "visible" class is added */
 }
 
+
+
+#templateInput{
+  background-color: #000;
+  color:antiquewhite;
+  
+}
+
 #annotation-textarea {
   width: 100%;
   height: 80px; /* Reduced height to ensure no overflow */
   margin-bottom: 10px; /* Space below the textarea */
   padding: 10px; /* Inner padding for better appearance */
   background-color: #333;
+
 }
 
 .annotation-dialog button {
@@ -167,6 +186,7 @@
   align-items: center;
   width: 100%;
   margin-top: 1%;
+  margin-left: 30%;
 }
 
 #button-container {
@@ -412,6 +432,4 @@
 }
   
 }
-
-
 
